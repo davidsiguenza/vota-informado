@@ -151,16 +151,16 @@ const QuestionnaireComponent: React.FC<{
             
             {!isReviewMode && onBack && onComplete &&(
                 <div className="fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur-sm border-t border-gray-200 shadow-[0_-4px_15px_rgba(0,0,0,0.05)]">
-                    <div className="max-w-4xl mx-auto p-4 flex justify-between items-center">
+                    <div className="max-w-4xl mx-auto p-4 flex justify-between items-center gap-4">
                         <button
                             onClick={onBack}
-                            className="bg-gray-200 text-gray-800 font-bold py-3 px-6 rounded-lg hover:bg-gray-300 transition-colors flex items-center gap-2">
+                            className="bg-gray-200 text-gray-800 font-bold py-3 px-4 sm:px-6 rounded-lg hover:bg-gray-300 transition-colors flex items-center gap-2 flex-shrink-0">
                             <ArrowLeftIcon className="w-5 h-5" />
-                            Ponderación
+                            <span className="hidden sm:inline">Ponderación</span>
                         </button>
-                        <div className="flex flex-col items-center">
-                            <div className="text-sm font-semibold text-gray-800">{answeredQuestions} de {totalQuestions} respondidas</div>
-                            <div className="w-56 h-2 bg-gray-300 rounded-full overflow-hidden mt-1">
+                        <div className="flex flex-col items-center flex-grow min-w-0">
+                            <div className="text-sm font-semibold text-gray-800 text-center">{answeredQuestions} de {totalQuestions} respondidas</div>
+                            <div className="w-full h-2 bg-gray-300 rounded-full overflow-hidden mt-1">
                                 <div 
                                     className="h-full bg-indigo-500 transition-all duration-500 ease-out" 
                                     style={{ width: `${(answeredQuestions / totalQuestions) * 100}%` }}
@@ -170,8 +170,8 @@ const QuestionnaireComponent: React.FC<{
                         <button
                             onClick={onComplete}
                             disabled={!isCompletionCriteriaMet}
-                            className="bg-indigo-600 text-white font-bold py-3 px-8 rounded-lg hover:bg-indigo-700 transition-colors shadow-md disabled:bg-indigo-300 disabled:cursor-not-allowed flex items-center gap-2">
-                            Ver Resultados
+                            className="bg-indigo-600 text-white font-bold py-3 px-4 sm:px-8 rounded-lg hover:bg-indigo-700 transition-colors shadow-md disabled:bg-indigo-300 disabled:cursor-not-allowed flex items-center gap-2 flex-shrink-0">
+                            <span className="hidden sm:inline">Ver Resultados</span>
                             <ArrowRightIcon className="w-5 h-5" />
                         </button>
                     </div>
