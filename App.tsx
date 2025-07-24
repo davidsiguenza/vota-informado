@@ -1,3 +1,4 @@
+
 import React, { useState, useMemo, useRef, useEffect } from 'react';
 import { UserAnswers, UserWeights, Stance, AffinityResult, Party, Question, CompassPoint, TopicAffinity, Point, PoliticalData, ChatMessage } from './types';
 import politicalData from './data/politicalData';
@@ -84,9 +85,11 @@ const QuestionnaireComponent: React.FC<{
 
     const [expandedTopics, setExpandedTopics] = useState<{[topicId: string]: boolean}>(() => {
         const initialState: {[topicId: string]: boolean} = {};
-        politicalData.topics.forEach(t => {
-            initialState[t.id] = true; // Start all expanded
-        });
+        if (isReviewMode) {
+            politicalData.topics.forEach(t => { initialState[t.id] = true; });
+        } else {
+             politicalData.topics.forEach(t => { initialState[t.id] = false; });
+        }
         return initialState;
     });
 
@@ -107,7 +110,7 @@ const QuestionnaireComponent: React.FC<{
             <div className={`max-w-4xl mx-auto bg-white ${isReviewMode ? 'pt-6' : 'p-8 rounded-xl shadow-lg mt-8 mb-32'}`}>
                 {!isReviewMode && (
                     <>
-                        <div className="flex justify-between items-center mb-2">
+                        <div className="flex justify-between items-center mb-4">
                             <h2 className="text-2xl font-bold text-gray-800">Paso 2: El Cuestionario</h2>
                             {onRandomFill && (
                                 <button
@@ -119,48 +122,66 @@ const QuestionnaireComponent: React.FC<{
                                 </button>
                             )}
                         </div>
-                        <p className="text-gray-600 mb-6">Para ver los resultados, debes responder al menos 2 preguntas de cada tema.</p>
+                        <div className="bg-blue-50 border-l-4 border-blue-500 text-blue-800 p-4 rounded-r-lg mb-6" role="alert">
+                            <p className="font-bold flex items-center gap-2"><InfoIcon className="w-5 h-5"/>Instrucción Importante</p>
+                            <p className="mt-1">Para ver los resultados, debes responder al menos <strong>2 preguntas de cada tema</strong>. Puedes expandir y contraer los temas para responder en el orden que prefieras.</p>
+                        </div>
                     </>
                 )}
                 <div className="space-y-4">
-                    {politicalData.topics.map(topic => (
-                        <div key={topic.id} className="p-4 border border-gray-200 rounded-lg">
-                            <button onClick={() => toggleTopic(topic.id)} className="w-full flex justify-between items-center text-left py-2">
-                                <h3 className="flex items-center gap-3 text-xl font-bold text-gray-700">
-                                    <span className="text-indigo-600">{topic.icon}</span> {topic.title}
-                                </h3>
-                                <ChevronDownIcon className={`w-6 h-6 text-gray-500 transition-transform duration-300 ${expandedTopics[topic.id] ? 'rotate-180' : ''}`} />
-                            </button>
-                            {expandedTopics[topic.id] && (
-                                <div className="space-y-6 mt-4 pt-4 border-t border-gray-200">
-                                    {topic.questions.map(q => (
-                                        <QuestionComponent 
-                                            key={q.id} 
-                                            question={q} 
-                                            userAnswer={userAnswers[q.id]} 
-                                            onAnswerChange={onAnswerChange}
-                                            showPartyStances={showPartyStances}
-                                        />
-                                    ))}
-                                </div>
-                            )}
-                        </div>
-                    ))}
+                    {politicalData.topics.map(topic => {
+                        const answeredInTopic = topic.questions.filter(q => userAnswers[q.id] !== undefined).length;
+                        const totalInTopic = topic.questions.length;
+                        const isRequirementMet = answeredInTopic >= 2;
+
+                        return (
+                            <div key={topic.id} className="p-4 border border-gray-200 rounded-lg">
+                                <button onClick={() => toggleTopic(topic.id)} className="w-full flex justify-between items-center text-left py-2">
+                                    <div className="flex items-center gap-4">
+                                        <span className="text-indigo-600">{topic.icon}</span>
+                                        <div className="text-left">
+                                            <h3 className="text-xl font-bold text-gray-700">{topic.title}</h3>
+                                            <div className={`text-sm font-medium flex items-center gap-2 mt-1 ${isRequirementMet ? 'text-green-600' : 'text-gray-500'}`}>
+                                                <span>{answeredInTopic} / {totalInTopic} respondidas</span>
+                                                {isRequirementMet && (
+                                                    <span className="px-2 py-0.5 bg-green-100 text-green-700 text-xs font-bold rounded-full">✓ Requisito cumplido</span>
+                                                )}
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <ChevronDownIcon className={`w-6 h-6 text-gray-500 transition-transform duration-300 ${expandedTopics[topic.id] ? 'rotate-180' : ''}`} />
+                                </button>
+                                {expandedTopics[topic.id] && (
+                                    <div className="space-y-6 mt-4 pt-4 border-t border-gray-200">
+                                        {topic.questions.map(q => (
+                                            <QuestionComponent 
+                                                key={q.id} 
+                                                question={q} 
+                                                userAnswer={userAnswers[q.id]} 
+                                                onAnswerChange={onAnswerChange}
+                                                showPartyStances={showPartyStances}
+                                            />
+                                        ))}
+                                    </div>
+                                )}
+                            </div>
+                        )
+                    })}
                 </div>
             </div>
             
             {!isReviewMode && onBack && onComplete &&(
                 <div className="fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur-sm border-t border-gray-200 shadow-[0_-4px_15px_rgba(0,0,0,0.05)]">
-                    <div className="max-w-4xl mx-auto p-4 flex justify-between items-center gap-4">
+                    <div className="max-w-4xl mx-auto p-4 flex justify-between items-center">
                         <button
                             onClick={onBack}
-                            className="bg-gray-200 text-gray-800 font-bold py-3 px-4 sm:px-6 rounded-lg hover:bg-gray-300 transition-colors flex items-center gap-2 flex-shrink-0">
+                            className="bg-gray-200 text-gray-800 font-bold py-3 px-6 rounded-lg hover:bg-gray-300 transition-colors flex items-center gap-2">
                             <ArrowLeftIcon className="w-5 h-5" />
-                            <span className="hidden sm:inline">Ponderación</span>
+                            Ponderación
                         </button>
-                        <div className="flex flex-col items-center flex-grow min-w-0">
-                            <div className="text-sm font-semibold text-gray-800 text-center">{answeredQuestions} de {totalQuestions} respondidas</div>
-                            <div className="w-full h-2 bg-gray-300 rounded-full overflow-hidden mt-1">
+                        <div className="flex flex-col items-center">
+                            <div className="text-sm font-semibold text-gray-800">{answeredQuestions} de {totalQuestions} respondidas</div>
+                            <div className="w-56 h-2 bg-gray-300 rounded-full overflow-hidden mt-1">
                                 <div 
                                     className="h-full bg-indigo-500 transition-all duration-500 ease-out" 
                                     style={{ width: `${(answeredQuestions / totalQuestions) * 100}%` }}
@@ -170,8 +191,8 @@ const QuestionnaireComponent: React.FC<{
                         <button
                             onClick={onComplete}
                             disabled={!isCompletionCriteriaMet}
-                            className="bg-indigo-600 text-white font-bold py-3 px-4 sm:px-8 rounded-lg hover:bg-indigo-700 transition-colors shadow-md disabled:bg-indigo-300 disabled:cursor-not-allowed flex items-center gap-2 flex-shrink-0">
-                            <span className="hidden sm:inline">Ver Resultados</span>
+                            className="bg-indigo-600 text-white font-bold py-3 px-8 rounded-lg hover:bg-indigo-700 transition-colors shadow-md disabled:bg-indigo-300 disabled:cursor-not-allowed flex items-center gap-2">
+                            Ver Resultados
                             <ArrowRightIcon className="w-5 h-5" />
                         </button>
                     </div>
@@ -438,7 +459,9 @@ const ResultsComponent: React.FC<{
     onAnswerChange: (questionId: string, value: Stance | null) => void;
     userWeights: UserWeights;
     onWeightChange: (topicId: string, value: number) => void;
-}> = ({ affinityResults, userAnswers, onAnswerChange, userWeights, onWeightChange }) => {
+    answeredQuestions: number;
+    totalQuestions: number;
+}> = ({ affinityResults, userAnswers, onAnswerChange, userWeights, onWeightChange, answeredQuestions, totalQuestions }) => {
     
     // Main Tab State
     type MainTab = 'principal' | 'ajustes' | 'posturas' | 'ia';
@@ -680,6 +703,29 @@ const ResultsComponent: React.FC<{
             </InfoModal>
             
             <div className="bg-white rounded-xl shadow-lg p-2 sm:p-6">
+                {answeredQuestions < totalQuestions && (
+                    <div className="bg-amber-50 border-l-4 border-amber-400 text-amber-800 p-4 rounded-r-lg mb-6 flex items-center gap-3" role="alert">
+                        <InfoIcon className="w-8 h-8 flex-shrink-0 text-amber-500" />
+                        <div>
+                             <p>
+                                Llevas <strong>{answeredQuestions}/{totalQuestions}</strong> preguntas respondidas. Esto puede hacer que los resultados no sean del todo precisos.
+                            </p>
+                            <p className="mt-1">
+                                Si lo deseas, puedes{' '}
+                                <button
+                                    onClick={() => {
+                                        setMainResultTab('ajustes');
+                                        setAjustesSubTab('respuestas');
+                                    }}
+                                    className="font-bold underline hover:text-amber-900 focus:outline-none"
+                                >
+                                    seguir completando preguntas
+                                </button>
+                                {' '}para mejorar el resultado.
+                            </p>
+                        </div>
+                    </div>
+                )}
                  <div className="bg-gray-100 p-2 rounded-t-lg">
                     <nav className="flex flex-wrap items-center justify-center gap-2" aria-label="Main Tabs">
                         {mainTabs.map(tab => (
@@ -932,6 +978,9 @@ const App: React.FC = () => {
     const [userWeights, setUserWeights] = useState<UserWeights>(() =>
         politicalData.topics.reduce((acc, topic) => ({ ...acc, [topic.id]: 2 }), {} as UserWeights)
     );
+
+    const totalQuestions = useMemo(() => politicalData.topics.flatMap(t => t.questions).length, []);
+    const answeredQuestions = useMemo(() => Object.values(userAnswers).filter(a => a !== undefined).length, [userAnswers]);
     
     const handleAnswerChange = (questionId: string, value: Stance | null) => {
         setUserAnswers(prev => ({ ...prev, [questionId]: value }));
@@ -995,7 +1044,15 @@ const App: React.FC = () => {
             case 'questionnaire':
                 return <QuestionnaireComponent userAnswers={userAnswers} onAnswerChange={handleAnswerChange} onBack={() => setView('weights')} onComplete={() => setView('results')} onRandomFill={handleRandomFill} showPartyStances={false} />;
             case 'results':
-                return <ResultsComponent affinityResults={affinityResults} userAnswers={userAnswers} userWeights={userWeights} onAnswerChange={handleAnswerChange} onWeightChange={handleWeightChange} />;
+                return <ResultsComponent 
+                            affinityResults={affinityResults} 
+                            userAnswers={userAnswers} 
+                            userWeights={userWeights} 
+                            onAnswerChange={handleAnswerChange} 
+                            onWeightChange={handleWeightChange} 
+                            answeredQuestions={answeredQuestions}
+                            totalQuestions={totalQuestions}
+                        />;
             case 'about':
                 return <AboutComponent onBack={() => setView(Object.keys(userAnswers).some(k=>userAnswers[k] !== undefined) ? 'results' : 'weights')} />;
             default:
