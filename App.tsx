@@ -177,7 +177,6 @@ const QuestionnaireComponent: React.FC<{
                             onClick={onBack}
                             className="bg-gray-200 text-gray-800 font-bold py-3 px-6 rounded-lg hover:bg-gray-300 transition-colors flex items-center gap-2">
                             <ArrowLeftIcon className="w-5 h-5" />
-                            Ponderación
                         </button>
                         <div className="flex flex-col items-center">
                             <div className="text-sm font-semibold text-gray-800">{answeredQuestions} de {totalQuestions} respondidas</div>
@@ -192,7 +191,6 @@ const QuestionnaireComponent: React.FC<{
                             onClick={onComplete}
                             disabled={!isCompletionCriteriaMet}
                             className="bg-indigo-600 text-white font-bold py-3 px-8 rounded-lg hover:bg-indigo-700 transition-colors shadow-md disabled:bg-indigo-300 disabled:cursor-not-allowed flex items-center gap-2">
-                            Ver Resultados
                             <ArrowRightIcon className="w-5 h-5" />
                         </button>
                     </div>
