@@ -37,6 +37,7 @@ export interface Question {
   id: string;
   text: string;
   description: string; // The statement the user and parties are ranked against
+  objective: string; // The reasoning behind why this question is asked
   partyStances: PartyStance[];
   ideologicalSign: IdeologicalSign;
 }
@@ -50,6 +51,7 @@ export interface Topic {
   id:string;
   title: string;
   icon: React.ReactNode;
+  description: string; // The overall analysis of the topic's conflict axis
   questions: Question[];
   partyTopicSummaries?: PartyTopicSummary[];
 }

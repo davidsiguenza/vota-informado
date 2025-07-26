@@ -1,13 +1,13 @@
 
 import React, { useState, useMemo, useRef, useEffect } from 'react';
-import { UserAnswers, UserWeights, Stance, AffinityResult, Party, Question, CompassPoint, TopicAffinity, Point, PoliticalData, ChatMessage } from './types';
+import { UserAnswers, UserWeights, Stance, AffinityResult, Party, Question, CompassPoint, PoliticalData, ChatMessage, Point } from './types';
 import politicalData from './data/politicalData';
 import { SparklesIcon, ArrowLeftIcon, ArrowRightIcon, ChevronDownIcon, TrophyIcon, InfoIcon, PaperAirplaneIcon } from './components/IconComponents';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell, ScatterChart, Scatter, ZAxis, Legend, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar, LabelList, Label } from 'recharts';
 import { generateResultExplanation, generateVoteIntentionAnalysis, generateChatResponse } from './services/geminiService';
 
 // --- Helper Types ---
-type View = 'weights' | 'questionnaire' | 'results' | 'about';
+type View = 'weights' | 'questionnaire' | 'results';
 
 // --- Helper Components defined outside App to prevent re-renders ---
 
@@ -79,7 +79,8 @@ const QuestionnaireComponent: React.FC<{
     onRandomFill?: () => void;
     showPartyStances: boolean;
     isReviewMode?: boolean;
-}> = ({ userAnswers, onAnswerChange, onBack, onComplete, onRandomFill, showPartyStances, isReviewMode = false }) => {
+    onOpenModal?: (title: string, content: React.ReactNode) => void;
+}> = ({ userAnswers, onAnswerChange, onBack, onComplete, onRandomFill, showPartyStances, isReviewMode = false, onOpenModal }) => {
     const totalQuestions = politicalData.topics.flatMap(t => t.questions).length;
     const answeredQuestions = Object.values(userAnswers).filter(a => a !== undefined).length;
 
@@ -137,16 +138,30 @@ const QuestionnaireComponent: React.FC<{
                         return (
                             <div key={topic.id} className="p-4 border border-gray-200 rounded-lg">
                                 <button onClick={() => toggleTopic(topic.id)} className="w-full flex justify-between items-center text-left py-2">
-                                    <div className="flex items-center gap-4">
-                                        <span className="text-indigo-600">{topic.icon}</span>
-                                        <div className="text-left">
-                                            <h3 className="text-xl font-bold text-gray-700">{topic.title}</h3>
-                                            <div className={`text-sm font-medium flex items-center gap-2 mt-1 ${isRequirementMet ? 'text-green-600' : 'text-gray-500'}`}>
-                                                <span>{answeredInTopic} / {totalInTopic} respondidas</span>
-                                                {isRequirementMet && (
-                                                    <span className="px-2 py-0.5 bg-green-100 text-green-700 text-xs font-bold rounded-full">✓ Requisito cumplido</span>
+                                    <div className="flex-1">
+                                        <div className="flex items-center gap-4">
+                                            <span className="text-indigo-600">{topic.icon}</span>
+                                            <div className="text-left flex items-center gap-2">
+                                                <h3 className="text-xl font-bold text-gray-700">{topic.title}</h3>
+                                                {showPartyStances && onOpenModal && (
+                                                    <button 
+                                                        onClick={(e) => {
+                                                            e.stopPropagation(); 
+                                                            onOpenModal(`Análisis del Tema: ${topic.title}`, <p>{topic.description}</p>);
+                                                        }}
+                                                        className="text-gray-400 hover:text-indigo-600"
+                                                        title="Ver análisis del tema"
+                                                    >
+                                                        <InfoIcon className="w-5 h-5"/>
+                                                    </button>
                                                 )}
                                             </div>
+                                        </div>
+                                         <div className={`text-sm font-medium flex items-center gap-2 mt-1 ml-10 ${isRequirementMet ? 'text-green-600' : 'text-gray-500'}`}>
+                                            <span>{answeredInTopic} / {totalInTopic} respondidas</span>
+                                            {isRequirementMet && (
+                                                <span className="px-2 py-0.5 bg-green-100 text-green-700 text-xs font-bold rounded-full">✓ Requisito cumplido</span>
+                                            )}
                                         </div>
                                     </div>
                                     <ChevronDownIcon className={`w-6 h-6 text-gray-500 transition-transform duration-300 ${expandedTopics[topic.id] ? 'rotate-180' : ''}`} />
@@ -160,6 +175,7 @@ const QuestionnaireComponent: React.FC<{
                                                 userAnswer={userAnswers[q.id]} 
                                                 onAnswerChange={onAnswerChange}
                                                 showPartyStances={showPartyStances}
+                                                onOpenModal={onOpenModal}
                                             />
                                         ))}
                                     </div>
@@ -191,6 +207,7 @@ const QuestionnaireComponent: React.FC<{
                             onClick={onComplete}
                             disabled={!isCompletionCriteriaMet}
                             className="bg-indigo-600 text-white font-bold py-3 px-8 rounded-lg hover:bg-indigo-700 transition-colors shadow-md disabled:bg-indigo-300 disabled:cursor-not-allowed flex items-center gap-2">
+                            
                             <ArrowRightIcon className="w-5 h-5" />
                         </button>
                     </div>
@@ -205,7 +222,8 @@ const QuestionComponent: React.FC<{
     userAnswer: Stance | null | undefined;
     onAnswerChange: (questionId: string, value: Stance | null) => void;
     showPartyStances: boolean;
-}> = ({ question, userAnswer, onAnswerChange, showPartyStances }) => {
+    onOpenModal?: (title: string, content: React.ReactNode) => void;
+}> = ({ question, userAnswer, onAnswerChange, showPartyStances, onOpenModal }) => {
     const [isExpanded, setIsExpanded] = useState(false);
     const stances: Stance[] = [-2, -1, 0, 1, 2];
     const labels = ['Totalmente en desacuerdo', 'En desacuerdo', 'Neutral', 'De acuerdo', 'Totalmente de acuerdo'];
@@ -213,7 +231,18 @@ const QuestionComponent: React.FC<{
     return (
         <div className="p-4 rounded-md bg-gray-50">
             <p className="font-semibold text-gray-800">{question.text}</p>
-            <p className="text-sm text-gray-600 mb-4">{question.description}</p>
+            <div className="flex items-start gap-2 mb-4">
+                <p className="text-sm text-gray-600 flex-grow">{question.description}</p>
+                {showPartyStances && onOpenModal && (
+                    <button
+                        onClick={() => onOpenModal(`Objetivo de la pregunta: ${question.text}`, <p>{question.objective}</p>)}
+                        className="text-gray-400 hover:text-indigo-600 flex-shrink-0 mt-0.5"
+                        title="Ver objetivo de la pregunta"
+                    >
+                        <InfoIcon className="w-5 h-5"/>
+                    </button>
+                )}
+            </div>
             
             <div className="flex flex-col sm:flex-row justify-between items-center mb-2 space-y-2 sm:space-y-0">
                 <span className="text-xs text-red-600 font-medium">{labels[0]}</span>
@@ -500,10 +529,9 @@ const ResultsComponent: React.FC<{
                     <p>Este ranking muestra tu porcentaje de afinidad con cada partido político. La puntuación se calcula de forma ponderada para reflejar qué temas te importan más.</p>
                     <h3 className="text-lg font-semibold mt-4 mb-2">Proceso Detallado:</h3>
                     <ol className="list-decimal list-inside space-y-2">
-                        <li><strong>Distancia por Pregunta:</strong> Para cada pregunta, comparamos tu respuesta (de -2 a +2) con la de cada partido. Una distancia de 0 es una coincidencia perfecta.</li>
-                        <li><strong>Afinidad por Tema:</strong> Calculamos tu afinidad media con cada partido en cada uno de los 10 temas.</li>
-                        <li><strong>Ponderación:</strong> Aplicamos la importancia que diste a cada tema. Los temas que marcaste como más importantes tienen un mayor peso en el resultado final.</li>
-                        <li><strong>Resultado Final:</strong> La puntuación final es la media ponderada de tus afinidades en todos los temas, convertida a un porcentaje (0-100%).</li>
+                        <li><strong>Afinidad por Tema:</strong> Para cada tema, calculamos tu afinidad media (0-100%) con un partido basándonos en las preguntas que has respondido en ese bloque.</li>
+                        <li><strong>Ponderación:</strong> Aplicamos la importancia que diste a cada tema (de "poco importante" a "muy importante"). Los temas que marcaste como más importantes tienen un mayor peso en el resultado final.</li>
+                        <li><strong>Resultado Final:</strong> La puntuación final es la media ponderada de tus afinidades en todos los temas que has respondido.</li>
                     </ol>
                 </>
             )
@@ -515,8 +543,8 @@ const ResultsComponent: React.FC<{
                     <p>La brújula te sitúa a ti y a los partidos en un mapa ideológico de dos ejes para una comparación visual rápida.</p>
                     <h3 className="text-lg font-semibold mt-4 mb-2">Los Ejes:</h3>
                     <ul className="list-disc list-inside space-y-2">
-                        <li><strong>Eje Económico (X):</strong> Mide desde el intervencionismo estatal (izquierda) hasta el liberalismo de mercado (derecha). Se basa en tus respuestas sobre Vivienda, Economía, Empleo y Pensiones.</li>
-                        <li><strong>Eje Social (Y):</strong> Mide desde posturas tradicionales/conservadoras (abajo) hasta progresistas (arriba). Se basa en tus respuestas sobre Igualdad, Inmigración y Regeneración Democrática.</li>
+                         <li><strong>Eje Económico (Izquierda-Derecha):</strong> Mide desde el intervencionismo estatal (más impuestos, regulación) a la izquierda, hasta el liberalismo de mercado (menos impuestos, desregulación) a la derecha. Se basa en tus respuestas sobre Economía, Empleo y Vivienda.</li>
+                         <li><strong>Eje Social (Progresista-Conservador):</strong> Mide desde posturas progresistas/libertarias (más derechos sociales, laicismo, plurinacionalidad) arriba, hasta posturas conservadoras/tradicionales (orden, valores tradicionales, centralismo) abajo. Se basa en tus respuestas sobre Políticas Sociales, Modelo Territorial, Educación, etc.</li>
                     </ul>
                      <h3 className="text-lg font-semibold mt-4 mb-2">Tu Posición vs. los Partidos:</h3>
                       <p>Tu punto se calcula dinámicamente como la media de tus respuestas en los temas de cada eje. La posición de los partidos es fija y representa su ubicación general en el espectro político español, basada en un análisis global de sus programas e ideología.</p>
@@ -617,7 +645,8 @@ const ResultsComponent: React.FC<{
                 });
             });
             if (answeredCount === 0) return 0;
-            return (totalScore / answeredCount) * 5; // Scale from [-2, 2] to [-10, 10]
+            // Scale from avg [-2, 2] to [-10, 10] range
+            return (totalScore / answeredCount) * 5; 
         };
         const userEconScore = calculateUserScore('economic');
         const userSocialScore = calculateUserScore('social');
@@ -757,7 +786,7 @@ const ResultsComponent: React.FC<{
                                 </div>
                             )}
                             {principalSubTab === 'brújula' && (
-                                <div className="py-6"><div className="flex items-center justify-center gap-2"><h3 className="text-xl font-bold text-gray-800">Brújula Ideológica</h3><button onClick={() => handleOpenModal(infoContent.compass.title, infoContent.compass.content)} className="text-gray-400 hover:text-indigo-600"><InfoIcon className="w-5 h-5"/></button></div><p className="text-gray-600 mb-4 text-center">Tu posición (punto destacado) y la de los partidos en el espectro político.</p><div className="h-[450px] w-full"><ResponsiveContainer width="100%" height="100%"><ScatterChart margin={{ top: 20, right: 40, bottom: 40, left: 20 }}><CartesianGrid /><XAxis type="number" dataKey="coords.x" name="Eje Económico" domain={[-10, 10]} label={{ value: 'Intervencionismo <-> Liberalismo', position: 'insideBottom', offset: -25 }} /><YAxis type="number" dataKey="coords.y" name="Eje Social" domain={[-10, 10]} label={{ value: 'Tradición <-> Progresismo', angle: -90, position: 'insideLeft', offset: -10 }} /><ZAxis dataKey="size" range={[100, 400]} /><Tooltip cursor={{ strokeDasharray: '3 3' }} content={<CompassTooltip />} /><Scatter name="Partidos" data={partyPoints} shape="circle"><LabelList dataKey="name" content={<PartyLabel />} />{partyPoints.map((p) => <Cell key={`cell-${p.name}`} fill={p.color} />)}</Scatter>{userPoint && <Scatter name="Tú" data={[userPoint]} shape="star" fill={userPoint.color}><LabelList dataKey="name" position="top" style={{fill: userPoint.color, fontWeight: 'bold'}} /></Scatter>}</ScatterChart></ResponsiveContainer></div></div>
+                                <div className="py-6"><div className="flex items-center justify-center gap-2"><h3 className="text-xl font-bold text-gray-800">Brújula Ideológica</h3><button onClick={() => handleOpenModal(infoContent.compass.title, infoContent.compass.content)} className="text-gray-400 hover:text-indigo-600"><InfoIcon className="w-5 h-5"/></button></div><p className="text-gray-600 mb-4 text-center">Tu posición (punto destacado) y la de los partidos en el espectro político.</p><div className="h-[450px] w-full"><ResponsiveContainer width="100%" height="100%"><ScatterChart margin={{ top: 20, right: 40, bottom: 40, left: 20 }}><CartesianGrid /><XAxis type="number" dataKey="coords.x" name="Eje Económico" domain={[-10, 10]} label={{ value: 'Intervencionismo <-> Liberalismo', position: 'insideBottom', offset: -25 }} /><YAxis type="number" dataKey="coords.y" name="Eje Social" domain={[-10, 10]} label={{ value: 'Conservador <-> Progresista', angle: -90, position: 'insideLeft', offset: -10 }} /><ZAxis dataKey="size" range={[100, 400]} /><Tooltip cursor={{ strokeDasharray: '3 3' }} content={<CompassTooltip />} /><Scatter name="Partidos" data={partyPoints} shape="circle"><LabelList dataKey="name" content={<PartyLabel />} />{partyPoints.map((p) => <Cell key={`cell-${p.name}`} fill={p.color} />)}</Scatter>{userPoint && <Scatter name="Tú" data={[userPoint]} shape="star" fill={userPoint.color}><LabelList dataKey="name" position="top" style={{fill: userPoint.color, fontWeight: 'bold'}} /></Scatter>}</ScatterChart></ResponsiveContainer></div></div>
                             )}
                             {principalSubTab === 'radar' && (
                                 <div className="py-6"><div className="mb-4"><div className="flex items-center justify-center gap-2"><h3 className="text-xl font-bold text-gray-800">Afinidad por Tema (Comparativa)</h3><button onClick={() => handleOpenModal(infoContent.radar.title, infoContent.radar.content)} className="text-gray-400 hover:text-indigo-600"><InfoIcon className="w-5 h-5"/></button></div><div className="flex flex-wrap gap-2 justify-center my-4">{politicalData.parties.map(p => (<button key={p.name} onClick={() => handleRadarPartyToggle(p.name)} className={`px-3 py-1 rounded-full text-sm font-semibold transition-all duration-200 border-2 ${selectedPartiesForRadar.includes(p.name) ? 'text-white' : ''}`} style={{ backgroundColor: selectedPartiesForRadar.includes(p.name) ? p.color : 'transparent', borderColor: p.color, color: selectedPartiesForRadar.includes(p.name) ? 'white' : p.color, }}>{p.name}</button>))}</div>{selectedPartiesForRadar.length >= 4 && <p className="text-xs text-yellow-600 mt-2 text-center">Puedes comparar hasta 4 partidos a la vez.</p>}</div><p className="text-gray-600 mb-4 text-center">Tu nivel de coincidencia en cada tema con los partidos seleccionados.</p><div className="h-96 w-full"><ResponsiveContainer width="100%" height="100%"><RadarChart cx="50%" cy="50%" outerRadius="80%" data={radarChartData}><PolarGrid /><PolarAngleAxis dataKey="topic" /><PolarRadiusAxis angle={30} domain={[0, 100]} tickFormatter={(tick) => `${tick}%`} /><Legend />{selectedPartiesForRadar.map(party => { const partyInfo = politicalData.parties.find(p => p.name === party); return <Radar key={party} name={party} dataKey={party} stroke={partyInfo?.color} fill={partyInfo?.color} fillOpacity={0.2} />; })}<Tooltip /></RadarChart></ResponsiveContainer></div></div>
@@ -781,6 +810,7 @@ const ResultsComponent: React.FC<{
                                         onAnswerChange={onAnswerChange}
                                         showPartyStances={true}
                                         isReviewMode={true}
+                                        onOpenModal={handleOpenModal}
                                     />
                                 </div>
                             )}
@@ -890,16 +920,8 @@ const ResultsComponent: React.FC<{
                             ], analysisTab, setAnalysisTab)}
 
                             {analysisTab === 'summary' && (<div className="py-6 text-center"><div className="flex items-center justify-center gap-2"><h3 className="text-xl font-bold mb-4 text-gray-800">Explicación del Resultado</h3><button onClick={() => handleOpenModal(infoContent.aiAnalysis.title, infoContent.aiAnalysis.content)} className="text-gray-400 hover:text-indigo-600 mb-4"><InfoIcon className="w-5 h-5"/></button></div><p className="text-gray-600 mb-4">Pulsa el botón para que una IA analice tus resultados y te ofrezca un resumen detallado del porqué de tu afinidad.</p><button onClick={handleGenerateExplanation} disabled={isLoading} className="inline-flex items-center gap-2 bg-indigo-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-indigo-700 transition-colors shadow-md disabled:bg-gray-400"><SparklesIcon className="w-5 h-5"/>{isLoading && !explanation ? 'Generando...' : 'Generar Explicación'}</button>{isLoading && <div className="mt-4 flex justify-center"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-600"></div></div>}{explanation && <MarkdownRenderer text={explanation} />}</div>)}
-                            {analysisTab === 'intention' && (<div className="py-6 text-center"><div className="flex items-center justify-center gap-2"><h3 className="text-xl font-bold mb-4 text-gray-800">Analiza tu Intención de Voto</h3><button onClick={() => handleOpenModal(infoContent.aiIntention.title, infoContent.aiIntention.content)} className="text-gray-400 hover:text-indigo-600 mb-4"><InfoIcon className="w-5 h-5"/></button></div><p className="text-gray-600 mb-4">Selecciona un partido y la IA te mostrará los puntos de mayor y menor alineamiento entre tus opiniones y su ideario.</p><div className="flex justify-center items-center gap-4"><select value={selectedPartyForIntention} onChange={(e) => setSelectedPartyForIntention(e.target.value as Party)} className="block w-full max-w-xs p-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500">{politicalData.parties.map(p => <option key={p.name} value={p.name}>{p.name}</option>)}</select><button onClick={handleGenerateIntentionAnalysis} disabled={isLoading} className="inline-flex items-center gap-2 bg-indigo-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-indigo-700 transition-colors shadow-md disabled:bg-gray-400"><SparklesIcon className="w-5 h-5"/>{isLoading && !intentionAnalysis ? 'Analizando...' : 'Analizar Voto'}</button></div>{isLoading && <div className="mt-4 flex justify-center"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-600"></div></div>}{intentionAnalysis && <MarkdownRenderer text={intentionAnalysis} />}</div>)}
-                             {analysisTab === 'chat' && (
-                                <div className="py-6">
-                                     <div className="flex items-center justify-center gap-2 mb-4">
-                                        <h3 className="text-xl font-bold text-gray-800">Pregúntale a la IA</h3>
-                                        <button onClick={() => handleOpenModal(infoContent.aiChat.title, infoContent.aiChat.content)} className="text-gray-400 hover:text-indigo-600"><InfoIcon className="w-5 h-5"/></button>
-                                    </div>
-                                    <ChatComponent politicalData={politicalData} />
-                                </div>
-                            )}
+                            {analysisTab === 'intention' && (<div className="py-6 text-center"><div className="flex items-center justify-center gap-2"><h3 className="text-xl font-bold mb-4 text-gray-800">Analiza tu Intención de Voto</h3><button onClick={() => handleOpenModal(infoContent.aiIntention.title, infoContent.aiIntention.content)} className="text-gray-400 hover:text-indigo-600 mb-4"><InfoIcon className="w-5 h-5"/></button></div><p className="text-gray-600 mb-4">Selecciona un partido y la IA te mostrará los puntos de mayor y menor alineamiento entre tus opiniones y su ideario.</p><div className="flex justify-center items-center gap-4 mb-4"><div className="flex flex-wrap justify-center gap-2 max-w-lg">{politicalData.parties.map(p => (<button key={p.name} onClick={() => setSelectedPartyForIntention(p.name)} className={`px-3 py-1 text-sm font-semibold rounded-full border-2 transition ${selectedPartyForIntention === p.name ? 'text-white' : ''}`} style={{ borderColor: p.color, backgroundColor: selectedPartyForIntention === p.name ? p.color : 'transparent', color: selectedPartyForIntention === p.name ? 'white' : p.color }}>{p.name}</button>))}</div></div><button onClick={handleGenerateIntentionAnalysis} disabled={isLoading} className="inline-flex items-center gap-2 bg-indigo-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-indigo-700 transition-colors shadow-md disabled:bg-gray-400"><SparklesIcon className="w-5 h-5"/>{isLoading && !intentionAnalysis ? 'Analizando...' : `Analizar Voto a ${selectedPartyForIntention}`}</button>{isLoading && <div className="mt-4 flex justify-center"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-600"></div></div>}{intentionAnalysis && <MarkdownRenderer text={intentionAnalysis} />}</div>)}
+                            {analysisTab === 'chat' && (<div className="py-6"><div className="flex items-center justify-center gap-2"><h3 className="text-xl font-bold mb-4 text-gray-800">Chatea con la IA</h3><button onClick={() => handleOpenModal(infoContent.aiChat.title, infoContent.aiChat.content)} className="text-gray-400 hover:text-indigo-600 mb-4"><InfoIcon className="w-5 h-5"/></button></div><ChatComponent politicalData={politicalData} /></div>)}
                         </div>
                     )}
                 </div>
@@ -908,78 +930,38 @@ const ResultsComponent: React.FC<{
     );
 };
 
-const AboutComponent: React.FC<{ onBack: () => void }> = ({ onBack }) => (
-    <div className="max-w-4xl mx-auto p-8 bg-white rounded-xl shadow-lg mt-8">
-        <h2 className="text-3xl font-bold text-gray-800 mb-2">Acerca de Vota Informado</h2>
-        <p className="text-lg text-gray-600 mb-8 border-b pb-4">Transparencia en nuestra Metodología</p>
-        
-        <div className="space-y-6">
-            <div>
-                <h3 className="text-2xl font-semibold text-gray-700 mb-3">Tecnología y Fuentes de Datos</h3>
-                <div className="space-y-4 text-gray-600 leading-relaxed">
-                    <p>
-                        El objetivo de "Vota Informado" es ofrecer una herramienta objetiva y basada en datos para ayudar a los ciudadanos a entender el panorama político. La base de conocimiento de esta aplicación se ha construido con un riguroso proceso de análisis.
-                    </p>
-                    <p>
-                        Para definir las posturas de los partidos, hemos utilizado avanzadas capacidades de Inteligencia Artificial, incluyendo los modelos de <strong>Deep Research de OpenAI</strong> y <strong>Deep Research de Gemini</strong>, para procesar y sintetizar información de más de <strong>175 fuentes de alta calidad</strong>. Estas fuentes incluyen programas electorales oficiales, registros de actividad parlamentaria, declaraciones públicas de líderes, documentos estratégicos y análisis de medios de comunicación verificados. Este proceso nos permite asignar una postura cuantificable a cada partido en cada una de las preguntas del cuestionario.
-                    </p>
-                    <p>
-                        Las explicaciones personalizadas que recibes en la sección de resultados son generadas en tiempo real por el modelo de lenguaje <strong>Gemini de Google</strong>. Se le instruye para actuar como un analista político neutral, basando su razonamiento exclusivamente en tus respuestas y en los datos que hemos recopilado.
-                    </p>
-                </div>
-            </div>
-
-            <div>
-                <h3 className="text-2xl font-semibold text-gray-700 mb-3">¿Cómo Calculamos tu Afinidad?</h3>
-                 <div className="space-y-4 text-gray-600 leading-relaxed">
-                    <p>Queremos que nuestro cálculo sea totalmente transparente. Tu puntuación de afinidad final es el resultado de un proceso de 5 pasos:</p>
-                    <ol className="list-decimal list-inside space-y-3 pl-2">
-                        <li>
-                            <strong>Paso 1: Tu Respuesta.</strong> Por cada pregunta, eliges una postura en una escala de 5 puntos: desde -2 (Totalmente en desacuerdo) hasta +2 (Totalmente de acuerdo).
-                        </li>
-                        <li>
-                            <strong>Paso 2: Cálculo de Distancia.</strong> Comparamos tu respuesta con la postura que hemos asignado a cada partido en esa misma pregunta. Calculamos la "distancia" ideológica entre ambos. Una distancia de 0 significa una coincidencia perfecta.
-                        </li>
-                        <li>
-                             <strong>Paso 3: Afinidad por Tema.</strong> Agrupamos las preguntas por los 10 temas principales. Para cada partido, calculamos una puntuación media de afinidad en cada tema, basándonos en las preguntas que hayas respondido dentro de ese bloque.
-                        </li>
-                        <li>
-                           <strong>Paso 4: Ponderación de Importancia.</strong> ¡Aquí es donde tu opinión es clave! Usamos las barras de importancia que ajustaste al principio. La afinidad de cada tema se multiplica por el peso que le diste (de 1 a 5). Los temas que más te importan tienen un mayor impacto en el resultado final.
-                        </li>
-                         <li>
-                            <strong>Paso 5: Resultado Final.</strong> Sumamos todas las puntuaciones ponderadas de los temas para cada partido. Este resultado se normaliza para mostrarte un porcentaje de afinidad final (de 0% a 100%), generando el ranking que ves en la página de resultados.
-                        </li>
-                    </ol>
-                </div>
-            </div>
-        </div>
-
-        <div className="mt-10 text-center">
-            <button
-                onClick={onBack}
-                className="bg-indigo-600 text-white font-bold py-3 px-8 rounded-lg hover:bg-indigo-700 transition-colors shadow-md flex items-center gap-2 mx-auto">
-                 <ArrowLeftIcon className="w-5 h-5" />
-                Volver
-            </button>
-        </div>
-    </div>
+const AboutComponent: React.FC = () => (
+    <>
+        <p><strong>Vota Informado</strong> es una herramienta educativa diseñada para ayudarte a explorar el panorama político español y entender mejor tu propia posición ideológica.</p>
+        <h3 className="text-lg font-semibold mt-4 mb-2">¿Cómo funciona?</h3>
+        <ol className="list-decimal list-inside space-y-2">
+            <li><strong>Pondera los temas:</strong> Primero, nos dices qué áreas políticas te importan más.</li>
+            <li><strong>Responde el cuestionario:</strong> Luego, te presentaremos una serie de afirmaciones sobre diversos temas para que muestres tu grado de acuerdo o desacuerdo.</li>
+            <li><strong>Descubre tus resultados:</strong> La herramienta cruza tus respuestas con las posturas oficiales de los principales partidos políticos de España para calcular tu porcentaje de afinidad.</li>
+        </ol>
+        <h3 className="text-lg font-semibold mt-4 mb-2">Fuentes y Metodología</h3>
+        <p>Las posturas de los partidos se han extraído y sintetizado a partir de sus programas electorales, declaraciones públicas y actividad parlamentaria reciente. El objetivo es ofrecer una "foto" lo más fiel y actualizada posible de su ideario. Las preguntas han sido diseñadas por analistas para ser polarizantes y capaces de diferenciar las posturas entre los distintos partidos en los ejes ideológicos clave.</p>
+        <h3 className="text-lg font-semibold mt-4 mb-2">Importante</h3>
+        <p>Esta herramienta no pretende ser un oráculo infalible ni decirte a quién votar. Es un ejercicio de autoconocimiento y educación cívica. Los resultados son una aproximación basada en un modelo y no deben tomarse como una verdad absoluta.</p>
+        <h3 className="text-lg font-semibold mt-4 mb-2">Privacidad</h3>
+        <p>Tu privacidad es fundamental. Todas tus respuestas se procesan localmente en tu navegador y no se guardan en ningún servidor. Las interacciones con la IA de Gemini son anónimas y no se asocian a tu persona.</p>
+    </>
 );
 
 
-const App: React.FC = () => {
+const App = () => {
     const [view, setView] = useState<View>('weights');
-    const [userAnswers, setUserAnswers] = useState<UserAnswers>(() => {
-        const initialAnswers: UserAnswers = {};
-        politicalData.topics.flatMap(t => t.questions).forEach(q => { initialAnswers[q.id] = undefined; });
-        return initialAnswers;
+    const [userAnswers, setUserAnswers] = useState<UserAnswers>({});
+    const [userWeights, setUserWeights] = useState<UserWeights>(() => {
+        const initialWeights: UserWeights = {};
+        politicalData.topics.forEach(topic => {
+            initialWeights[topic.id] = 2; // Default to 'Importante'
+        });
+        return initialWeights;
     });
-    const [userWeights, setUserWeights] = useState<UserWeights>(() =>
-        politicalData.topics.reduce((acc, topic) => ({ ...acc, [topic.id]: 2 }), {} as UserWeights)
-    );
-
-    const totalQuestions = useMemo(() => politicalData.topics.flatMap(t => t.questions).length, []);
-    const answeredQuestions = useMemo(() => Object.values(userAnswers).filter(a => a !== undefined).length, [userAnswers]);
     
+    const [isAboutModalOpen, setIsAboutModalOpen] = useState(false);
+
     const handleAnswerChange = (questionId: string, value: Stance | null) => {
         setUserAnswers(prev => ({ ...prev, [questionId]: value }));
     };
@@ -990,80 +972,105 @@ const App: React.FC = () => {
 
     const handleRandomFill = () => {
         const randomAnswers: UserAnswers = {};
-        const stances: Stance[] = [-2, -1, 0, 1, 2];
-        politicalData.topics.flatMap(t => t.questions).forEach(q => {
-            const randomIndex = Math.floor(Math.random() * stances.length);
-            randomAnswers[q.id] = stances[randomIndex];
+        politicalData.topics.forEach(topic => {
+            topic.questions.forEach(q => {
+                const stances: (Stance | null)[] = [-2, -1, 0, 1, 2, null];
+                randomAnswers[q.id] = stances[Math.floor(Math.random() * stances.length)];
+            });
         });
         setUserAnswers(randomAnswers);
     };
-    
-    const affinityResults = useMemo<AffinityResult[]>(() => {
-        const affinityScores: { [party in Party]?: { [topicId: string]: { score: number; count: number } } } = {};
-        politicalData.parties.forEach(p => { affinityScores[p.name] = {}; });
-        politicalData.topics.forEach(topic => {
-             topic.questions.forEach(question => {
-                const userAnswer = userAnswers[question.id];
-                if (userAnswer === null || userAnswer === undefined) return;
-                question.partyStances.forEach(partyStance => {
-                    const party = partyStance.party;
-                    if (!affinityScores[party]![topic.id]) {
-                        affinityScores[party]![topic.id] = { score: 0, count: 0 };
-                    }
-                    const distance = Math.abs(userAnswer - partyStance.stance);
-                    affinityScores[party]![topic.id].score += (4 - distance) / 4;
-                    affinityScores[party]![topic.id].count += 1;
-                });
-            });
-        });
 
-        const finalResults: AffinityResult[] = politicalData.parties.map(p => {
-            let totalWeightedScore = 0; let totalWeights = 0;
+    const affinityResults = useMemo<AffinityResult[]>(() => {
+        if (Object.keys(userAnswers).length === 0) return [];
+
+        const results: AffinityResult[] = politicalData.parties.map(party => {
+            let totalWeightedAffinity = 0;
+            let totalWeightSum = 0;
+
             politicalData.topics.forEach(topic => {
-                const topicData = affinityScores[p.name]![topic.id];
-                if(topicData && topicData.count > 0) {
-                    const topicAvg = topicData.score / topicData.count;
-                    const weight = (userWeights[topic.id] || 2) + 1;
-                    totalWeightedScore += topicAvg * weight;
-                    totalWeights += weight;
+                const topicWeight = (userWeights[topic.id] ?? 2) + 1;
+
+                let topicAffinitySum = 0;
+                let questionsAnsweredInTopic = 0;
+
+                topic.questions.forEach(question => {
+                    const userAnswer = userAnswers[question.id];
+                    const partyStanceObj = question.partyStances.find(ps => ps.party === party.name);
+
+                    if (userAnswer !== null && userAnswer !== undefined && partyStanceObj) {
+                        questionsAnsweredInTopic++;
+                        const distance = Math.abs(userAnswer - partyStanceObj.stance);
+                        const questionAffinity = (4 - distance) / 4; // 0 to 1
+                        topicAffinitySum += questionAffinity;
+                    }
+                });
+
+                if (questionsAnsweredInTopic > 0) {
+                    const avgTopicAffinity = topicAffinitySum / questionsAnsweredInTopic;
+                    totalWeightedAffinity += avgTopicAffinity * topicWeight;
+                    totalWeightSum += topicWeight;
                 }
             });
-            const finalScore = totalWeights > 0 ? (totalWeightedScore / totalWeights) * 100 : 0;
-            return { party: p.name, score: finalScore };
+
+            const finalScore = totalWeightSum > 0 ? (totalWeightedAffinity / totalWeightSum) * 100 : 0;
+            return { party: party.name, score: finalScore };
         });
 
-        return finalResults.sort((a, b) => b.score - a.score);
+        return results.sort((a, b) => b.score - a.score);
     }, [userAnswers, userWeights]);
+    
+    const totalQuestions = politicalData.topics.flatMap(t => t.questions).length;
+    const answeredQuestions = Object.values(userAnswers).filter(a => a !== undefined).length;
 
-    const renderView = () => {
-        switch (view) {
+    const renderContent = () => {
+        switch(view) {
             case 'weights':
-                return <TopicWeightsComponent userWeights={userWeights} onWeightChange={handleWeightChange} onNext={() => setView('questionnaire')} />;
+                return <TopicWeightsComponent 
+                            userWeights={userWeights} 
+                            onWeightChange={handleWeightChange} 
+                            onNext={() => setView('questionnaire')} 
+                        />;
             case 'questionnaire':
-                return <QuestionnaireComponent userAnswers={userAnswers} onAnswerChange={handleAnswerChange} onBack={() => setView('weights')} onComplete={() => setView('results')} onRandomFill={handleRandomFill} showPartyStances={false} />;
+                return <QuestionnaireComponent 
+                            userAnswers={userAnswers} 
+                            onAnswerChange={handleAnswerChange}
+                            onBack={() => setView('weights')}
+                            onComplete={() => {
+                                setView('results');
+                                window.scrollTo(0,0);
+                            }}
+                            onRandomFill={handleRandomFill}
+                            showPartyStances={false}
+                        />;
             case 'results':
                 return <ResultsComponent 
-                            affinityResults={affinityResults} 
-                            userAnswers={userAnswers} 
-                            userWeights={userWeights} 
-                            onAnswerChange={handleAnswerChange} 
-                            onWeightChange={handleWeightChange} 
+                            affinityResults={affinityResults}
+                            userAnswers={userAnswers}
+                            onAnswerChange={handleAnswerChange}
+                            userWeights={userWeights}
+                            onWeightChange={handleWeightChange}
                             answeredQuestions={answeredQuestions}
                             totalQuestions={totalQuestions}
-                        />;
-            case 'about':
-                return <AboutComponent onBack={() => setView(Object.keys(userAnswers).some(k=>userAnswers[k] !== undefined) ? 'results' : 'weights')} />;
+                        />
             default:
-                return <TopicWeightsComponent userWeights={userWeights} onWeightChange={handleWeightChange} onNext={() => setView('questionnaire')} />;
+                return null;
         }
     };
-    
+
     return (
-        <div className="min-h-screen bg-gray-100 pb-12">
-            <Header onInfoClick={() => setView('about')} />
-            <main>
-                {renderView()}
+        <div className="bg-gray-100 min-h-screen font-sans">
+             <Header onInfoClick={() => setIsAboutModalOpen(true)} />
+             <main>
+                {renderContent()}
             </main>
+            <InfoModal 
+                isOpen={isAboutModalOpen} 
+                onClose={() => setIsAboutModalOpen(false)}
+                title="Acerca de Vota Informado"
+            >
+                <AboutComponent />
+            </InfoModal>
         </div>
     );
 };
