@@ -69,7 +69,6 @@ const politicalData: PoliticalData = {
         },
         {
           id: 'economia-q3',
-          priority: 1,
           text: 'Reducción del gasto público',
           description: 'Es prioritario reducir el gasto público y el tamaño de la administración para bajar impuestos, aunque implique recortar algunos servicios.',
           objective: 'Esta pregunta plantea el dilema fundamental entre el tamaño del Estado y la carga fiscal que lo sostiene. Obliga a posicionarse sobre qué es más importante: la provisión de servicios públicos o la reducción de la presión fiscal sobre ciudadanos y empresas.',
@@ -131,7 +130,30 @@ const politicalData: PoliticalData = {
             { party: Party.UPN, stance: -1 as Stance, justification: "Su programa se centra en una bajada general del Impuesto de Sociedades, sin poner el foco en una diferenciación significativa por tamaño de empresa." },
           ]
         },
-      ],
+      
+        {
+          id: 'economia-q6',
+          priority: 1,
+          text: 'Déficit y gasto social',
+          description: 'España debe priorizar la reducción del déficit y la deuda pública aunque eso limite nuevas subidas de pensiones, salarios públicos o prestaciones.',
+          objective: 'Introduce un trade-off fiscal muy actual: estabilidad presupuestaria frente a expansión del gasto social. Ayuda a diferenciar posiciones liberales, socialdemócratas y de izquierda transformadora.',
+          ideologicalSign: { economic: 1, social: 0 },
+          partyStances: [
+            { party: Party.PP, stance: 2 as Stance, justification: "Defiende la estabilidad presupuestaria, la reducción del déficit y una mayor contención del gasto público." },
+            { party: Party.PSOE, stance: -1 as Stance, justification: "Acepta reglas fiscales europeas, pero prioriza preservar pensiones, salarios públicos y políticas sociales." },
+            { party: Party.VOX, stance: 1 as Stance, justification: "Propone reducir deuda y gasto político, aunque evita presentar el ajuste como recorte de prestaciones populares." },
+            { party: Party.SUMAR, stance: -2 as Stance, justification: "Rechaza que la disciplina fiscal limite derechos sociales y defiende aumentar ingresos antes que recortar gasto." },
+            { party: Party.PODEMOS, stance: -2 as Stance, justification: "Se opone frontalmente a la austeridad y defiende financiar el gasto social con mayor presión fiscal a rentas altas y grandes empresas." },
+            { party: Party.ERC, stance: -1 as Stance, justification: "Su perfil de izquierdas prioriza políticas sociales, aunque vincula la discusión a la soberanía fiscal catalana." },
+            { party: Party.JUNTS, stance: 1 as Stance, justification: "Su orientación liberal y proempresa le acerca a la disciplina fiscal y la contención del gasto." },
+            { party: Party.EH_BILDU, stance: -2 as Stance, justification: "Defiende reforzar el Estado social y rechaza marcos de austeridad que limiten gasto público." },
+            { party: Party.PNV, stance: 1 as Stance, justification: "Mantiene una cultura de prudencia fiscal y equilibrio presupuestario, compatible con servicios públicos sólidos." },
+            { party: Party.BNG, stance: -2 as Stance, justification: "Rechaza la austeridad y prioriza gasto social e inversión pública, especialmente para Galicia." },
+            { party: Party.CC, stance: 0 as Stance, justification: "Combina prudencia fiscal con defensa de financiación suficiente para servicios y singularidades canarias." },
+            { party: Party.UPN, stance: 2 as Stance, justification: "Su programa fiscal conservador prioriza estabilidad, reducción de deuda y eficiencia del gasto." },
+          ]
+        },
+],
       partyTopicSummaries: [
         { party: Party.PP, summary: "Propone bajar impuestos (IRPF, Sociedades) y suprimir Sucesiones y Patrimonio. Defiende la competencia fiscal entre CCAA y se opone a los impuestos a banca y energéticas." },
         { party: Party.PSOE, summary: "Defiende una fiscalidad progresiva, manteniendo los impuestos a los beneficios de la banca y energéticas. Busca armonizar impuestos como Sucesiones para evitar la competencia a la baja." },
@@ -177,7 +199,6 @@ const politicalData: PoliticalData = {
         },
         {
           id: 'empleo-q2',
-          priority: 1,
           text: 'Aumento del Salario Mínimo (SMI)',
           description: 'El Salario Mínimo Interprofesional (SMI) debe seguir aumentando anualmente para garantizar el poder adquisitivo de los trabajadores.',
           objective: 'La pregunta evalúa el grado de apoyo a la intervención estatal en la base de la escala salarial, frente a las tesis que defienden que su fijación debe estar más ligada a la productividad y a la negociación colectiva.',
@@ -261,7 +282,30 @@ const politicalData: PoliticalData = {
             { party: Party.UPN, stance: 1 as Stance, justification: "Se alinea con las tesis pro-empresa, defendiendo un marco laboral que no sea una carga para la contratación." },
           ]
         },
-      ],
+      
+        {
+          id: 'empleo-q6',
+          priority: 1,
+          text: 'Automatización e IA en el empleo',
+          description: 'Las empresas que sustituyan empleo por automatización o inteligencia artificial deberían asumir cotizaciones o impuestos específicos para financiar formación y protección social.',
+          objective: 'Mide la postura ante el impacto laboral de la IA: regulación redistributiva y protección social frente a libertad empresarial e innovación sin cargas adicionales.',
+          ideologicalSign: { economic: -1, social: 0 },
+          partyStances: [
+            { party: Party.PP, stance: -1 as Stance, justification: "Prioriza innovación, competitividad y menor carga regulatoria para empresas, aunque puede apoyar formación." },
+            { party: Party.PSOE, stance: 1 as Stance, justification: "Defiende regular la transición digital y reforzar formación, aunque probablemente con instrumentos moderados." },
+            { party: Party.VOX, stance: -2 as Stance, justification: "Rechaza nuevos impuestos empresariales y tiende a favorecer desregulación y competitividad." },
+            { party: Party.SUMAR, stance: 2 as Stance, justification: "Defiende que la productividad tecnológica se reparta y financie derechos laborales y protección social." },
+            { party: Party.PODEMOS, stance: 2 as Stance, justification: "Apoyaría una tasa o cotización específica para evitar que la automatización aumente desigualdad y precariedad." },
+            { party: Party.ERC, stance: 1 as Stance, justification: "Apoya mecanismos de protección laboral y formación, con preferencia por capacidad de gestión propia catalana." },
+            { party: Party.JUNTS, stance: -1 as Stance, justification: "Su perfil proempresa le hace recelar de nuevas cotizaciones o impuestos a la innovación." },
+            { party: Party.EH_BILDU, stance: 2 as Stance, justification: "Defiende que los beneficios de la automatización financien derechos sociales y empleo de calidad." },
+            { party: Party.PNV, stance: 0 as Stance, justification: "Puede apoyar formación y transición industrial pactada, pero evitaría penalizar la innovación empresarial." },
+            { party: Party.BNG, stance: 2 as Stance, justification: "Se alinea con una respuesta pública fuerte ante impactos laborales de la automatización." },
+            { party: Party.CC, stance: -1 as Stance, justification: "Prioriza no cargar a empresas, especialmente pymes y sector turístico, aunque apoyaría planes formativos." },
+            { party: Party.UPN, stance: -1 as Stance, justification: "Defiende competitividad empresarial y sería contrario a crear cargas fiscales específicas." },
+          ]
+        },
+],
       partyTopicSummaries: [
         { party: Party.PP, summary: "Propone un mercado laboral flexible, se opone a la reducción de jornada por ley y es crítico con las subidas unilaterales del SMI. Considera derogar la reforma laboral de 2021 para volver a un modelo más parecido al de 2012." },
         { party: Party.PSOE, summary: "Defensor de la última reforma laboral, las subidas del SMI y la reducción de la jornada. Se opone a la flexibilización del despido y defiende un sistema de pensiones revalorizado con el IPC." },
@@ -349,7 +393,6 @@ const politicalData: PoliticalData = {
         },
         {
           id: 'vivienda-q4',
-          priority: 1,
           text: 'Construcción de vivienda pública',
           description: 'La principal solución al problema de la vivienda es la construcción masiva de vivienda pública en régimen de alquiler social.',
           objective: 'Contrapone el modelo de intervención pública directa, defendido por la izquierda como la solución estructural, frente a los modelos de la derecha que se centran en incentivos fiscales y colaboración público-privada para movilizar la oferta existente.',
@@ -390,7 +433,30 @@ const politicalData: PoliticalData = {
             { party: Party.UPN, stance: -2 as Stance, justification: "Se alinea con PP y Vox en la defensa del libre mercado y la no intervención." },
           ]
         },
-      ],
+      
+        {
+          id: 'vivienda-q6',
+          priority: 1,
+          text: 'Compra especulativa de vivienda',
+          description: 'En zonas tensionadas, se debe limitar o gravar fuertemente la compra de vivienda por fondos, empresas o compradores no residentes cuando no sea para residencia habitual.',
+          objective: 'Actualiza el debate de vivienda hacia inversión especulativa, compradores no residentes y fondos. Distingue intervención sobre demanda inversora frente a defensa de libre mercado y seguridad jurídica.',
+          ideologicalSign: { economic: -1, social: 0 },
+          partyStances: [
+            { party: Party.PP, stance: -1 as Stance, justification: "Prefiere aumentar oferta y seguridad jurídica antes que limitar compradores o penalizar inversión." },
+            { party: Party.PSOE, stance: 1 as Stance, justification: "Ha defendido medidas fiscales sobre compras especulativas o no residentes, aunque con enfoque moderado." },
+            { party: Party.VOX, stance: -2 as Stance, justification: "Rechaza restricciones al mercado y a la propiedad privada, salvo enfoque de prioridad nacional en ayudas." },
+            { party: Party.SUMAR, stance: 2 as Stance, justification: "Defiende limitar la especulación inmobiliaria y priorizar la función social de la vivienda." },
+            { party: Party.PODEMOS, stance: 2 as Stance, justification: "Mantiene una posición dura contra fondos, especulación y vivienda como activo financiero." },
+            { party: Party.ERC, stance: 2 as Stance, justification: "Apoya limitar usos especulativos del parque residencial, especialmente en zonas tensionadas catalanas." },
+            { party: Party.JUNTS, stance: -1 as Stance, justification: "Tiende a proteger seguridad jurídica e inversión, aunque puede aceptar medidas propias catalanas más selectivas." },
+            { party: Party.EH_BILDU, stance: 2 as Stance, justification: "Prioriza vivienda como derecho y limitaría la compra especulativa." },
+            { party: Party.PNV, stance: 0 as Stance, justification: "Puede aceptar regulación selectiva, pero desde un enfoque pragmático y competencial vasco." },
+            { party: Party.BNG, stance: 2 as Stance, justification: "Defiende frenar la especulación y proteger vivienda habitual, especialmente frente a presión turística." },
+            { party: Party.CC, stance: 1 as Stance, justification: "En Canarias hay presión por compra exterior y turística, por lo que puede apoyar límites o gravámenes específicos." },
+            { party: Party.UPN, stance: -1 as Stance, justification: "Se inclina por propiedad privada, oferta e incentivos antes que restricciones a compradores." },
+          ]
+        },
+],
       partyTopicSummaries: [
         { party: Party.PP, summary: "Enfoque pro-mercado: se opone a la regulación de precios del alquiler y del alquiler de temporada, y propone medidas duras contra la ocupación (desalojos exprés). Apoya la colaboración público-privada en vivienda." },
         { party: Party.PSOE, summary: "Principal impulsor de la Ley de Vivienda, con regulación de precios en zonas tensionadas y del alquiler de temporada. Apuesta por la construcción de vivienda pública y se opone a los desalojos exprés." },
@@ -478,7 +544,6 @@ const politicalData: PoliticalData = {
         },
         {
           id: 'territorial-q4',
-          priority: 1,
           text: 'Derecho de autodeterminación',
           description: 'Se debe reconocer el derecho de autodeterminación y facilitar la celebración de un referéndum de independencia en Cataluña y el País Vasco.',
           objective: 'Es la pregunta clave del soberanismo. Una respuesta afirmativa implica un cuestionamiento fundamental del artículo 2 de la Constitución sobre la "indisoluble unidad de la Nación española".',
@@ -520,7 +585,30 @@ const politicalData: PoliticalData = {
             { party: Party.UPN, stance: -2 as Stance, justification: "Defiende el Convenio Económico como un elemento esencial e irrenunciable del régimen foral de Navarra." },
           ]
         },
-      ],
+      
+        {
+          id: 'territorial-q6',
+          priority: 1,
+          text: 'Condonación de deuda autonómica',
+          description: 'El Estado debe condonar parte de la deuda autonómica, especialmente la vinculada al FLA, aunque algunas comunidades lo consideren un agravio comparativo.',
+          objective: 'Captura una de las tensiones territoriales actuales: solidaridad financiera, negociación con Cataluña y trato igualitario entre comunidades.',
+          ideologicalSign: { economic: 0, social: 1 },
+          partyStances: [
+            { party: Party.PP, stance: -2 as Stance, justification: "Critica la condonación como cesión política y agravio entre comunidades." },
+            { party: Party.PSOE, stance: 1 as Stance, justification: "Ha defendido mecanismos de alivio de deuda autonómica dentro de acuerdos territoriales." },
+            { party: Party.VOX, stance: -2 as Stance, justification: "Rechaza concesiones a comunidades y especialmente las vinculadas a pactos con independentistas." },
+            { party: Party.SUMAR, stance: 1 as Stance, justification: "Apoya soluciones federales y mecanismos que alivien financiación autonómica si mantienen solidaridad." },
+            { party: Party.PODEMOS, stance: 1 as Stance, justification: "Tiende a apoyar condonaciones o reestructuraciones que liberen gasto social autonómico." },
+            { party: Party.ERC, stance: 2 as Stance, justification: "Lo considera una corrección parcial de la infrafinanciación y una demanda clave en la negociación catalana." },
+            { party: Party.JUNTS, stance: 2 as Stance, justification: "Defiende aliviar deuda y avanzar hacia mayor soberanía financiera catalana." },
+            { party: Party.EH_BILDU, stance: 1 as Stance, justification: "Apoya soluciones asimétricas y de alivio financiero, defendiendo autogobierno." },
+            { party: Party.PNV, stance: 0 as Stance, justification: "Su régimen foral le sitúa en una posición diferenciada; puede aceptar acuerdos pero vigila su impacto territorial." },
+            { party: Party.BNG, stance: 1 as Stance, justification: "Puede apoyar si beneficia servicios públicos y reconoce problemas de financiación territorial." },
+            { party: Party.CC, stance: -1 as Stance, justification: "Teme agravios y pérdida de recursos para territorios como Canarias si la medida favorece a otros." },
+            { party: Party.UPN, stance: -2 as Stance, justification: "Rechaza privilegios territoriales pactados y defiende igualdad entre españoles." },
+          ]
+        },
+],
       partyTopicSummaries: [
         { party: Party.PP, summary: "Defensor del Estado de las Autonomías y la unidad de España. Se opone a la autodeterminación y a la financiación singular para Cataluña, pero defiende la autonomía fiscal de las CCAA y los regímenes forales." },
         { party: Party.PSOE, summary: "Defiende el Estado de las Autonomías con una visión federalizante. Rechaza la autodeterminación pero está abierto a una 'financiación singular' para Cataluña. Defiende los regímenes forales y la armonización fiscal." },
@@ -630,7 +718,6 @@ const politicalData: PoliticalData = {
           },
           {
             id: 'igualdad-q5',
-          priority: 1,
             text: 'Control de fronteras vs. acogida',
             description: 'Se debe priorizar el control estricto de fronteras y la expulsión de inmigrantes en situación irregular, por encima de las políticas de acogida e integración.',
             objective: 'Esta pregunta aborda el dilema central de las políticas migratorias, enfrentando el enfoque de seguridad y "ley y orden" de la derecha con el enfoque de derechos humanos y solidaridad de la izquierda.',
@@ -650,7 +737,30 @@ const politicalData: PoliticalData = {
               { party: Party.UPN, stance: 1 as Stance, justification: "Se alinea con las tesis del PP, defendiendo una inmigración legal, ordenada y vinculada al mercado de trabajo." },
             ]
           },
-        ],
+        
+        {
+          id: 'igualdad-q6',
+          priority: 1,
+          text: 'Regularización por arraigo',
+          description: 'España debería aprobar regularizaciones extraordinarias para inmigrantes que acrediten arraigo laboral o familiar, aunque hayan llegado de forma irregular.',
+          objective: 'Actualiza el eje migratorio: integración y derechos frente a efecto llamada y control de fronteras. Es una pregunta altamente discriminante entre bloques.',
+          ideologicalSign: { economic: 0, social: 1 },
+          partyStances: [
+            { party: Party.PP, stance: -1 as Stance, justification: "Defiende inmigración ordenada y legal, y suele rechazar regularizaciones amplias aunque acepte arraigo caso a caso." },
+            { party: Party.PSOE, stance: 1 as Stance, justification: "Ha apoyado vías de regularización por arraigo e integración laboral, con control administrativo." },
+            { party: Party.VOX, stance: -2 as Stance, justification: "Se opone frontalmente a regularizaciones y defiende endurecer la política migratoria." },
+            { party: Party.SUMAR, stance: 2 as Stance, justification: "Defiende regularización amplia por derechos humanos, integración y lucha contra economía sumergida." },
+            { party: Party.PODEMOS, stance: 2 as Stance, justification: "Apoya regularizaciones extraordinarias y derechos plenos para personas migrantes." },
+            { party: Party.ERC, stance: 2 as Stance, justification: "Defiende políticas migratorias inclusivas y regularización de personas arraigadas." },
+            { party: Party.JUNTS, stance: 0 as Stance, justification: "Combina discurso de gestión competencial catalana con posiciones más restrictivas en orden público." },
+            { party: Party.EH_BILDU, stance: 2 as Stance, justification: "Defiende regularización, acogida e integración desde una perspectiva de derechos." },
+            { party: Party.PNV, stance: 1 as Stance, justification: "Suele apoyar integración ordenada y políticas pragmáticas de arraigo." },
+            { party: Party.BNG, stance: 2 as Stance, justification: "Defiende regularización y derechos sociales para población migrante." },
+            { party: Party.CC, stance: 0 as Stance, justification: "Canarias vive presión migratoria directa; combina solidaridad con demanda de control y apoyo estatal." },
+            { party: Party.UPN, stance: -1 as Stance, justification: "Se alinea con una visión de inmigración legal y controlada, escéptica ante regularizaciones extraordinarias." },
+          ]
+        },
+],
         partyTopicSummaries: [
           { party: Party.PP, summary: "Postura conservadora. Se opone a la Ley Trans y a la eutanasia, y apoya endurecer la Ley del 'solo sí es sí'. Prioriza el control de fronteras en inmigración." },
           { party: Party.PSOE, summary: "Impulsor de las leyes de igualdad, eutanasia y Ley Trans, aunque con debate interno en esta última. Lideró la reforma de la ley del 'solo sí es sí' y busca un equilibrio en inmigración." },
@@ -738,7 +848,6 @@ const politicalData: PoliticalData = {
           },
           {
             id: 'educacion-q4',
-          priority: 1,
             text: 'Protección de lenguas cooficiales',
             description: 'El uso de las lenguas cooficiales como lengua vehicular principal en la enseñanza (inmersión lingüística) debe ser protegido y garantizado.',
             objective: 'Evalúa la postura en el conflicto lingüístico-territorial, uno de los más sensibles y definitorios del panorama político.',
@@ -780,7 +889,30 @@ const politicalData: PoliticalData = {
               { party: Party.UPN, stance: 1 as Stance, justification: "En Navarra, con los Sanfermines como emblema, la tauromaquia tiene un fuerte arraigo cultural que UPN defiende." },
             ]
           },
-        ],
+        
+        {
+          id: 'educacion-q6',
+          priority: 1,
+          text: 'Móviles y redes en menores',
+          description: 'Debe prohibirse o restringirse severamente el uso de móviles y redes sociales por menores de 16 años, con verificación de edad obligatoria.',
+          objective: 'Introduce un debate transversal y muy actual: protección de menores, libertad digital, responsabilidad de plataformas y papel regulador del Estado.',
+          ideologicalSign: { economic: 0, social: -1 },
+          partyStances: [
+            { party: Party.PP, stance: 1 as Stance, justification: "Apoya restricciones en centros y medidas de protección de menores, con énfasis en familias y educación." },
+            { party: Party.PSOE, stance: 1 as Stance, justification: "Ha impulsado debates regulatorios sobre protección de menores y verificación de edad en entornos digitales." },
+            { party: Party.VOX, stance: 1 as Stance, justification: "Defiende protección de menores y autoridad familiar, aunque recela de ciertas regulaciones estatales." },
+            { party: Party.SUMAR, stance: 1 as Stance, justification: "Apoya regular plataformas y proteger salud mental infantil, cuidando garantías de privacidad." },
+            { party: Party.PODEMOS, stance: 1 as Stance, justification: "Defiende regulación de grandes tecnológicas y protección de menores frente a adicción digital." },
+            { party: Party.ERC, stance: 1 as Stance, justification: "Probablemente favorable si respeta competencias educativas y privacidad." },
+            { party: Party.JUNTS, stance: 0 as Stance, justification: "Puede apoyar medidas educativas, pero con cautela ante regulación estatal centralizada." },
+            { party: Party.EH_BILDU, stance: 1 as Stance, justification: "Favorable a proteger menores y regular plataformas, con enfoque comunitario y competencial." },
+            { party: Party.PNV, stance: 1 as Stance, justification: "Pragmático y favorable a medidas de protección en educación y salud pública." },
+            { party: Party.BNG, stance: 1 as Stance, justification: "Apoya regulación protectora si respeta competencias y derechos lingüísticos/culturales." },
+            { party: Party.CC, stance: 1 as Stance, justification: "Probablemente favorable a restricciones educativas y de protección de menores." },
+            { party: Party.UPN, stance: 1 as Stance, justification: "Favorable a medidas de autoridad educativa y protección familiar de menores." },
+          ]
+        },
+],
         partyTopicSummaries: [
             { party: Party.PP, summary: "Defiende la libertad de elección de centro (público/concertado), una EBAU única, el castellano como lengua vehicular y es crítico con el PIN Parental. Apoya la tauromaquia." },
             { party: Party.PSOE, summary: "Prioriza la red pública aunque mantiene la concertada. Se opone a la EBAU única y al PIN Parental, y defiende la inmersión lingüística. Postura ambigua sobre la tauromaquia." },
@@ -826,7 +958,6 @@ const politicalData: PoliticalData = {
           },
           {
             id: 'sanidad-q2',
-          priority: 1,
             text: 'Ampliación de servicios gratuitos',
             description: 'El sistema público de salud debe incorporar plenamente y de forma gratuita los servicios de salud bucodental, óptica, fisioterapia y salud mental.',
             objective: 'Mide el grado de ambición en la expansión del Estado del Bienestar y la concepción de la salud como un derecho integral, frente a una visión más restrictiva y centrada en la sostenibilidad financiera.',
@@ -909,7 +1040,30 @@ const politicalData: PoliticalData = {
               { party: Party.UPN, stance: -1 as Stance, justification: "Se alinea con el PP en la defensa de medidas de corresponsabilidad para garantizar la sostenibilidad del sistema sanitario." },
             ]
           },
-        ],
+        
+        {
+          id: 'sanidad-q6',
+          priority: 1,
+          text: 'Derivación a sanidad privada',
+          description: 'Para reducir listas de espera, la sanidad pública debería derivar más pacientes a centros privados si sale más rápido, aunque aumente el peso de empresas sanitarias.',
+          objective: 'Plantea un trade-off concreto y actual entre rapidez asistencial y modelo público. Es más discriminante que una pregunta genérica sobre sanidad pública o privada.',
+          ideologicalSign: { economic: 1, social: 0 },
+          partyStances: [
+            { party: Party.PP, stance: 2 as Stance, justification: "Defiende colaboración público-privada como vía pragmática para reducir listas de espera." },
+            { party: Party.PSOE, stance: -1 as Stance, justification: "Prioriza reforzar la sanidad pública, aunque algunas administraciones socialistas usan conciertos puntuales." },
+            { party: Party.VOX, stance: 1 as Stance, justification: "Apoya fórmulas de colaboración y libertad de elección frente a monopolio público." },
+            { party: Party.SUMAR, stance: -2 as Stance, justification: "Rechaza privatización y derivaciones estructurales, defendiendo inversión directa en el sistema público." },
+            { party: Party.PODEMOS, stance: -2 as Stance, justification: "Se opone frontalmente a la sanidad privada financiada con dinero público." },
+            { party: Party.ERC, stance: -1 as Stance, justification: "Defiende reforzar lo público, aunque Cataluña tiene tradición de red concertada." },
+            { party: Party.JUNTS, stance: 1 as Stance, justification: "Más favorable a colaboración con entidades privadas o concertadas dentro del modelo catalán." },
+            { party: Party.EH_BILDU, stance: -2 as Stance, justification: "Defiende sanidad pública directa y rechaza derivaciones privadas estructurales." },
+            { party: Party.PNV, stance: -1 as Stance, justification: "Defiende Osakidetza pública fuerte, aunque con pragmatismo en gestión." },
+            { party: Party.BNG, stance: -2 as Stance, justification: "Rechaza privatización y conciertos como solución estructural a listas de espera." },
+            { party: Party.CC, stance: 1 as Stance, justification: "Puede apoyar derivaciones para resolver listas, especialmente por limitaciones insulares de capacidad." },
+            { party: Party.UPN, stance: 1 as Stance, justification: "Favorable a colaboración público-privada y libertad de elección sanitaria." },
+          ]
+        },
+],
         partyTopicSummaries: [
             { party: Party.PP, summary: "Defiende la colaboración público-privada (concesiones) y el modelo MUFACE. Es escéptico con la ampliación de servicios por su coste y apoya el copago farmacéutico por corresponsabilidad." },
             { party: Party.PSOE, summary: "Prioriza la gestión pública y ha impulsado la ampliación de servicios (bucodental, mental). Ha eliminado progresivamente el copago farmacéutico. Evita el debate sobre MUFACE." },
@@ -955,7 +1109,6 @@ const politicalData: PoliticalData = {
           },
           {
             id: 'ecologia-q2',
-          priority: 1,
             text: 'Normativa ambiental para el campo',
             description: 'Hay que relajar las normativas medioambientales europeas y nacionales para apoyar la competitividad del sector agrícola y ganadero.',
             objective: 'Mide la prioridad que se otorga a la protección del medio ambiente frente a las demandas del sector primario, capturando la tensión "campo vs. ecologismo".',
@@ -1039,7 +1192,30 @@ const politicalData: PoliticalData = {
               { party: Party.UPN, stance: 2 as Stance, justification: "En Navarra, la caza es una actividad con un fuerte arraigo social y económico que UPN defiende." },
             ]
           },
-        ],
+        
+        {
+          id: 'ecologia-q6',
+          priority: 1,
+          text: 'Coste social de la transición verde',
+          description: 'Si las políticas climáticas encarecen energía, transporte o alimentos, deberían ralentizarse para proteger a hogares y sector agrario.',
+          objective: 'Mide el conflicto entre ambición climática y coste social/económico inmediato, especialmente relevante por energía, agricultura, transporte y protestas rurales.',
+          ideologicalSign: { economic: 1, social: -1 },
+          partyStances: [
+            { party: Party.PP, stance: 1 as Stance, justification: "Defiende transición gradual compatible con competitividad, campo y poder adquisitivo." },
+            { party: Party.PSOE, stance: -1 as Stance, justification: "Mantiene objetivos climáticos, aunque incorpora compensaciones sociales y ayudas sectoriales." },
+            { party: Party.VOX, stance: 2 as Stance, justification: "Critica las políticas climáticas europeas y prioriza costes para hogares, campo e industria." },
+            { party: Party.SUMAR, stance: -2 as Stance, justification: "Defiende acelerar la transición ecológica con justicia social, no ralentizarla." },
+            { party: Party.PODEMOS, stance: -2 as Stance, justification: "Prioriza medidas climáticas fuertes y compensación redistributiva antes que frenar la transición." },
+            { party: Party.ERC, stance: -1 as Stance, justification: "Apoya transición verde con políticas sociales y competencias propias." },
+            { party: Party.JUNTS, stance: 0 as Stance, justification: "Combina sensibilidad empresarial/rural con apoyo a modernización energética." },
+            { party: Party.EH_BILDU, stance: -2 as Stance, justification: "Defiende transición ecosocial ambiciosa con protección a clases populares." },
+            { party: Party.PNV, stance: 0 as Stance, justification: "Busca equilibrio entre industria vasca, energía y objetivos climáticos." },
+            { party: Party.BNG, stance: -1 as Stance, justification: "Apoya transición ecológica, aunque con defensa de sectores productivos gallegos." },
+            { party: Party.CC, stance: 0 as Stance, justification: "Equilibra sostenibilidad, coste energético insular y dependencia turística." },
+            { party: Party.UPN, stance: 1 as Stance, justification: "Más sensible al impacto en agricultura, hogares y competitividad territorial." },
+          ]
+        },
+],
         partyTopicSummaries: [
             { party: Party.PP, summary: "Defiende una transición ecológica pragmática, proponiendo alargar la vida de las nucleares, un Plan Hidrológico con trasvases y relajar normativas ambientales para el campo. Apoya la caza." },
             { party: Party.PSOE, summary: "Mantiene el plan de cierre nuclear y apuesta por las renovables. Apoya el objetivo de 2035 para coches de combustión con matices y prefiere la gestión de la demanda a los trasvases. Postura ambigua en la caza." },
@@ -1106,7 +1282,6 @@ const politicalData: PoliticalData = {
           },
           {
             id: 'exterior-q3',
-          priority: 1,
             text: 'Sanciones a Israel',
             description: 'El Gobierno español debe imponer sanciones a Israel y liderar una postura más contundente en la UE por sus acciones en Palestina.',
             objective: 'Mide la posición en uno de los conflictos internacionales más polarizantes y que mejor define la identidad de la izquierda.',
@@ -1168,7 +1343,30 @@ const politicalData: PoliticalData = {
               { party: Party.UPN, stance: -1 as Stance, justification: "Apoyan la UE pero desde una perspectiva pragmática y de defensa de los intereses de sus regiones." },
             ]
           },
-        ],
+        
+        {
+          id: 'exterior-q6',
+          priority: 1,
+          text: 'Sanciones a Israel',
+          description: 'España debe suspender el comercio de armas y promover sanciones económicas contra Israel mientras continúe la ocupación y la guerra en Palestina.',
+          objective: 'Actualiza la política exterior con un asunto de alta saliencia moral y diplomática: derechos humanos, alianzas occidentales y reconocimiento de Palestina.',
+          ideologicalSign: { economic: 0, social: 1 },
+          partyStances: [
+            { party: Party.PP, stance: -1 as Stance, justification: "Defiende solución de dos Estados, pero es más cauto ante sanciones económicas y ruptura comercial." },
+            { party: Party.PSOE, stance: 1 as Stance, justification: "Ha impulsado reconocimiento palestino y posiciones críticas, aunque mantiene cautela diplomática." },
+            { party: Party.VOX, stance: -2 as Stance, justification: "Mantiene una posición fuertemente pro-Israel y contraria a sanciones." },
+            { party: Party.SUMAR, stance: 2 as Stance, justification: "Defiende embargo de armas, sanciones y presión internacional más contundente." },
+            { party: Party.PODEMOS, stance: 2 as Stance, justification: "Es de los actores más firmes a favor de sanciones y ruptura de comercio de armas." },
+            { party: Party.ERC, stance: 2 as Stance, justification: "Apoya reconocimiento palestino, embargo y medidas de presión por derechos humanos." },
+            { party: Party.JUNTS, stance: 0 as Stance, justification: "Puede apoyar condenas humanitarias, pero suele ser más prudente en sanciones económicas." },
+            { party: Party.EH_BILDU, stance: 2 as Stance, justification: "Defiende sanciones, embargo y solidaridad activa con Palestina." },
+            { party: Party.PNV, stance: 1 as Stance, justification: "Apoya derechos humanos y solución diplomática, con tono institucional y europeísta." },
+            { party: Party.BNG, stance: 2 as Stance, justification: "Defiende sanciones y embargo desde una posición antiocupación y de solidaridad internacional." },
+            { party: Party.CC, stance: 0 as Stance, justification: "Suele adoptar posiciones más institucionales y moderadas en política exterior." },
+            { party: Party.UPN, stance: -1 as Stance, justification: "Se alinea con posiciones conservadoras prudentes y recelosas de sanciones unilaterales." },
+          ]
+        },
+],
         partyTopicSummaries: [
             { party: Party.PP, summary: "Europeísta y atlantista. Apoya aumentar el gasto en defensa al 2% del PIB pero es crítico con el giro sobre el Sáhara. Mantiene una postura pro-israelí y se opone a ceder más soberanía fiscal a la UE." },
             { party: Party.PSOE, summary: "Europeísta y federalista. Defiende el aumento del gasto en defensa y el giro sobre el Sáhara. Ha elevado el tono de crítica a Israel y aboga por una mayor integración europea." },
@@ -1256,7 +1454,6 @@ const politicalData: PoliticalData = {
           },
           {
             id: 'democracia-q4',
-          priority: 1,
             text: 'Leyes contra los "bulos"',
             description: 'El Gobierno debe impulsar leyes para combatir la difusión de "bulos" en medios y redes sociales, aunque suponga limitar la libertad de expresión.',
             objective: 'Mide la postura en el delicado equilibrio entre la lucha contra la desinformación y la protección de las libertades fundamentales.',
@@ -1297,7 +1494,30 @@ const politicalData: PoliticalData = {
               { party: Party.UPN, stance: 1 as Stance, justification: "Apoyan medidas contra la corrupción, pero sin el énfasis de otros partidos." },
             ]
           },
-        ],
+        
+        {
+          id: 'democracia-q6',
+          priority: 1,
+          text: 'Dimisión por imputación',
+          description: 'Los cargos públicos deberían dimitir al ser imputados por corrupción o delitos graves, aunque aún no exista condena.',
+          objective: 'Mide exigencia ética institucional frente a presunción de inocencia y uso partidista de causas judiciales. No encaja del todo en izquierda-derecha, pero es clave para calidad democrática.',
+          ideologicalSign: { economic: 0, social: 0 },
+          partyStances: [
+            { party: Party.PP, stance: 1 as Stance, justification: "Defiende regeneración y exigencia ética, aunque suele matizar según fase judicial y contexto político." },
+            { party: Party.PSOE, stance: 0 as Stance, justification: "Combina discurso de ejemplaridad con defensa de la presunción de inocencia y cautela ante imputaciones." },
+            { party: Party.VOX, stance: 1 as Stance, justification: "Usa un discurso duro contra la corrupción y exigiría dimisiones, especialmente a adversarios." },
+            { party: Party.SUMAR, stance: 1 as Stance, justification: "Defiende estándares éticos altos, aunque suele incorporar garantías frente a lawfare." },
+            { party: Party.PODEMOS, stance: 0 as Stance, justification: "Defiende regeneración, pero es muy sensible al uso político de procedimientos judiciales." },
+            { party: Party.ERC, stance: 0 as Stance, justification: "Apoya transparencia, pero desconfía del uso judicial contra independentismo." },
+            { party: Party.JUNTS, stance: 0 as Stance, justification: "Defiende garantías y denuncia persecución judicial, por lo que evitaría automatismos." },
+            { party: Party.EH_BILDU, stance: 0 as Stance, justification: "Apoya ética pública, pero recela de automatismos judiciales con lectura política." },
+            { party: Party.PNV, stance: 1 as Stance, justification: "Suele defender estándares institucionales y prudencia, con cultura de gestión responsable." },
+            { party: Party.BNG, stance: 1 as Stance, justification: "Defiende regeneración y exigencia de responsabilidades políticas tempranas." },
+            { party: Party.CC, stance: 1 as Stance, justification: "Apoya códigos éticos y responsabilidad política, aunque con prudencia jurídica." },
+            { party: Party.UPN, stance: 1 as Stance, justification: "Defiende regeneración institucional y exigencia de responsabilidad ante casos graves." },
+          ]
+        },
+],
         partyTopicSummaries: [
             { party: Party.PP, summary: "Defiende la Monarquía y se opone a derogar la Ley de Memoria. Su principal propuesta es que 'los jueces elijan a los jueces' del CGPJ. Se opone a leyes contra los 'bulos'." },
             { party: Party.PSOE, summary: "Defiende la Monarquía, la Ley de Memoria y la elección parlamentaria del CGPJ. Es favorable a leyes contra los 'bulos', pero su postura en la lucha anticorrupción se ve debilitada por la amnistía." },
