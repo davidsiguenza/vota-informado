@@ -1,6 +1,6 @@
 
 import React, { useState, useMemo, useRef, useEffect } from 'react';
-import { UserAnswers, UserWeights, Stance, AffinityResult, Party, Question, CompassPoint, Point, PoliticalData, ChatMessage } from './types';
+import { UserAnswers, UserWeights, Stance, AffinityResult, Party, Question, QuestionPriority, CompassPoint, Point, PoliticalData, ChatMessage } from './types';
 import politicalData from './data/politicalData';
 import { SparklesIcon, ArrowLeftIcon, ArrowRightIcon, ChevronDownIcon, TrophyIcon, InfoIcon, PaperAirplaneIcon } from './components/IconComponents';
 import { XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell, ScatterChart, Scatter, ZAxis, Legend, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar, LabelList } from 'recharts';
@@ -18,6 +18,15 @@ const LOCAL_STORAGE_KEYS = {
 
 // --- Helper Components defined outside App to prevent re-renders ---
 
+
+
+const QUESTION_PRIORITY_META: Record<QuestionPriority, { label: string; description: string; className: string }> = {
+    1: { label: 'Prioritaria', description: 'Sale en el modo rápido porque discrimina mucho o es muy actual.', className: 'bg-indigo-100 text-indigo-700 border-indigo-200' },
+    2: { label: 'Recomendada', description: 'Aporta precisión adicional al resultado.', className: 'bg-slate-100 text-slate-700 border-slate-200' },
+    3: { label: 'Profundización', description: 'Pregunta más específica o de nicho para afinar el perfil.', className: 'bg-purple-100 text-purple-700 border-purple-200' },
+};
+
+const getQuestionPriorityMeta = (priority: Question['priority'] = 2) => QUESTION_PRIORITY_META[priority];
 
 const getSortedQuestions = (questions: Question[]) =>
     [...questions].sort((a, b) => (a.priority ?? 2) - (b.priority ?? 2));
@@ -239,9 +248,19 @@ const QuestionComponent: React.FC<{
     const stances: Stance[] = [-2, -1, 0, 1, 2];
     const labels = ['Totalmente en desacuerdo', 'En desacuerdo', 'Neutral', 'De acuerdo', 'Totalmente de acuerdo'];
 
+    const priorityMeta = getQuestionPriorityMeta(question.priority);
+
     return (
         <div className="p-4 rounded-md bg-gray-50">
-            <p className="font-semibold text-gray-800">{question.text}</p>
+            <div className="flex flex-wrap items-center gap-2 mb-1">
+                <p className="font-semibold text-gray-800">{question.text}</p>
+                <span
+                    className={`inline-flex items-center rounded-full border px-2 py-0.5 text-[11px] font-bold uppercase tracking-wide ${priorityMeta.className}`}
+                    title={priorityMeta.description}
+                >
+                    {priorityMeta.label}
+                </span>
+            </div>
             <p className="text-sm text-gray-600 mb-4">{question.description}</p>
             
             <div className="flex flex-col sm:flex-row justify-between items-center mb-2 space-y-2 sm:space-y-0">
@@ -492,7 +511,7 @@ const ResultsComponent: React.FC<{
     const reliability = getReliabilityInfo(answeredQuestions, totalQuestions);
     
     // Main Tab State
-    type MainTab = 'principal' | 'ajustes' | 'posturas' | 'ia';
+    type MainTab = 'principal' | 'ajustes' | 'metodologia' | 'posturas' | 'ia';
     const [mainResultTab, setMainResultTab] = useState<MainTab>('principal');
 
     // Sub-Tab States
@@ -720,6 +739,7 @@ const ResultsComponent: React.FC<{
     const mainTabs = [
       { key: 'principal', label: 'Panel Principal' },
       { key: 'ajustes', label: 'Ajustes y Respuestas' },
+      { key: 'metodologia', label: 'Metodología y fuentes' },
       { key: 'posturas', label: 'Posturas de Partidos' },
       { key: 'ia', label: 'Análisis con IA' },
     ];
@@ -833,6 +853,61 @@ const ResultsComponent: React.FC<{
                         </div>
                     )}
                     
+
+                    {mainResultTab === 'metodologia' && (
+                        <div className="py-6 max-w-4xl mx-auto text-left space-y-6">
+                            <div className="text-center">
+                                <h3 className="text-2xl font-bold text-gray-800">Metodología y fuentes</h3>
+                                <p className="text-gray-600 mt-2">Cómo se construye el cuestionario, qué significa cada prioridad y qué límites tiene el resultado.</p>
+                            </div>
+
+                            <div className="grid md:grid-cols-3 gap-4">
+                                {([1, 2, 3] as QuestionPriority[]).map(priority => {
+                                    const meta = getQuestionPriorityMeta(priority);
+                                    return (
+                                        <div key={priority} className="bg-white border rounded-lg p-4 shadow-sm">
+                                            <span className={`inline-flex rounded-full border px-2 py-0.5 text-xs font-bold uppercase tracking-wide ${meta.className}`}>{meta.label}</span>
+                                            <p className="text-sm text-gray-700 mt-3">{meta.description}</p>
+                                        </div>
+                                    );
+                                })}
+                            </div>
+
+                            <div className="bg-white border rounded-lg p-5 shadow-sm space-y-3">
+                                <h4 className="text-lg font-bold text-gray-800">Cómo se calcula la afinidad</h4>
+                                <ol className="list-decimal list-inside space-y-2 text-gray-700">
+                                    <li>Cada respuesta del usuario y cada postura de partido usa la misma escala: -2 a +2.</li>
+                                    <li>Por cada pregunta se mide la distancia entre tu respuesta y la postura del partido.</li>
+                                    <li>La distancia se convierte en afinidad: coincidencia total = 100%, oposición total = 0%.</li>
+                                    <li>Las afinidades se promedian por tema y luego se ponderan con la importancia que diste a cada bloque.</li>
+                                    <li>Las preguntas no respondidas no cuentan: por eso el resultado mejora cuantas más preguntas completes.</li>
+                                </ol>
+                            </div>
+
+                            <div className="bg-white border rounded-lg p-5 shadow-sm space-y-3">
+                                <h4 className="text-lg font-bold text-gray-800">Criterios para elegir preguntas</h4>
+                                <ul className="list-disc list-inside space-y-2 text-gray-700">
+                                    <li><strong>Relevancia actual:</strong> vivienda, inmigración, financiación autonómica, IA, defensa, sanidad y regeneración democrática pesan más en la agenda reciente.</li>
+                                    <li><strong>Capacidad discriminante:</strong> se priorizan preguntas que separan posiciones reales entre partidos, no solo consensos genéricos.</li>
+                                    <li><strong>Trade-offs claros:</strong> las mejores preguntas obligan a elegir entre valores en tensión: gasto social vs déficit, rapidez sanitaria vs privatización, clima vs coste económico.</li>
+                                    <li><strong>Continuidad:</strong> las preguntas antiguas no desaparecen; se reordenan para que el modo rápido use primero las más informativas.</li>
+                                </ul>
+                            </div>
+
+                            <div className="bg-amber-50 border border-amber-200 rounded-lg p-5 text-amber-900 space-y-2">
+                                <h4 className="text-lg font-bold">Limitaciones importantes</h4>
+                                <p>Esto no es una recomendación de voto ni una verdad absoluta. Es una herramienta orientativa basada en posturas sintetizadas de partidos y en una escala simplificada.</p>
+                                <p>Las posiciones políticas cambian, algunas son ambiguas y otras dependen del territorio o del contexto parlamentario. Conviene revisar periódicamente el dataset y añadir fuentes trazables por pregunta.</p>
+                            </div>
+
+                            <div className="bg-white border rounded-lg p-5 shadow-sm space-y-3">
+                                <h4 className="text-lg font-bold text-gray-800">Fuentes de referencia usadas para la actualización 2026</h4>
+                                <p className="text-gray-700">Para detectar temas relevantes se han cruzado señales de actualidad política, barómetros y cobertura de prensa sobre vivienda, inmigración, financiación autonómica, IA/menores, defensa, sanidad y regeneración.</p>
+                                <p className="text-sm text-gray-600">Siguiente mejora pendiente: añadir trazabilidad granular fuente → pregunta → postura de partido, con fecha de revisión del dataset.</p>
+                            </div>
+                        </div>
+                    )}
+
                     {mainResultTab === 'posturas' && (
                         <div>
                             {renderSubTabs([
