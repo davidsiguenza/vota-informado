@@ -33,11 +33,14 @@ export interface IdeologicalSign {
   social: -1 | 0 | 1;
 }
 
+export type QuestionPriority = 1 | 2 | 3; // 1: quick mode, 2: recommended, 3: deep dive
+
 export interface Question {
   id: string;
   text: string;
   description: string; // The statement the user and parties are ranked against
   objective: string; // The reasoning behind why this question is asked
+  priority?: QuestionPriority;
   partyStances: PartyStance[];
   ideologicalSign: IdeologicalSign;
 }

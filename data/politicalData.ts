@@ -26,6 +26,7 @@ const politicalData: PoliticalData = {
       questions: [
         {
           id: 'economia-q1',
+          priority: 1,
           text: 'Impuestos a banca y energéticas',
           description: 'El Estado debe mantener impuestos específicos y permanentes a los beneficios extraordinarios de la banca y las empresas energéticas.',
           objective: 'Esta pregunta mide directamente el apoyo a la fiscalidad como herramienta de redistribución sectorial y de intervención en el mercado. La clave es la palabra "permanentes", que diferencia entre una medida de emergencia y un cambio estructural en el sistema tributario.',
@@ -68,6 +69,7 @@ const politicalData: PoliticalData = {
         },
         {
           id: 'economia-q3',
+          priority: 1,
           text: 'Reducción del gasto público',
           description: 'Es prioritario reducir el gasto público y el tamaño de la administración para bajar impuestos, aunque implique recortar algunos servicios.',
           objective: 'Esta pregunta plantea el dilema fundamental entre el tamaño del Estado y la carga fiscal que lo sostiene. Obliga a posicionarse sobre qué es más importante: la provisión de servicios públicos o la reducción de la presión fiscal sobre ciudadanos y empresas.',
@@ -153,6 +155,7 @@ const politicalData: PoliticalData = {
       questions: [
         {
           id: 'empleo-q1',
+          priority: 1,
           text: 'Reducción de la jornada laboral',
           description: 'La jornada laboral máxima debe reducirse progresivamente a 35 horas semanales sin reducción salarial.',
           objective: 'Esta pregunta aborda directamente la propuesta más innovadora y divisiva del debate laboral actual. La respuesta revela la visión de cada partido sobre el futuro del trabajo y el equilibrio entre productividad y calidad de vida.',
@@ -174,6 +177,7 @@ const politicalData: PoliticalData = {
         },
         {
           id: 'empleo-q2',
+          priority: 1,
           text: 'Aumento del Salario Mínimo (SMI)',
           description: 'El Salario Mínimo Interprofesional (SMI) debe seguir aumentando anualmente para garantizar el poder adquisitivo de los trabajadores.',
           objective: 'La pregunta evalúa el grado de apoyo a la intervención estatal en la base de la escala salarial, frente a las tesis que defienden que su fijación debe estar más ligada a la productividad y a la negociación colectiva.',
@@ -195,6 +199,7 @@ const politicalData: PoliticalData = {
         },
         {
           id: 'empleo-q3',
+          priority: 3,
           text: 'Derogación de la reforma laboral',
           description: 'Se debe derogar la última reforma laboral para recuperar la indemnización por despido de 45 días y la autorización administrativa para EREs.',
           objective: 'Esta es una pregunta de alta precisión, diseñada para diferenciar las posturas dentro de la propia izquierda. Mientras PSOE y Sumar defienden la reforma vigente, Podemos y otros partidos a su izquierda la consideran insuficiente.',
@@ -280,6 +285,7 @@ const politicalData: PoliticalData = {
       questions: [
         {
           id: 'vivienda-q1',
+          priority: 1,
           text: 'Regulación de precios del alquiler',
           description: 'El Estado debe regular y limitar el precio de los alquileres en las zonas de mercado tensionado.',
           objective: 'Es la pregunta central sobre el modelo de la Ley de Vivienda. Mide el grado de aceptación de la intervención directa en el mercado del alquiler como solución al problema de la asequibilidad.',
@@ -343,6 +349,7 @@ const politicalData: PoliticalData = {
         },
         {
           id: 'vivienda-q4',
+          priority: 1,
           text: 'Construcción de vivienda pública',
           description: 'La principal solución al problema de la vivienda es la construcción masiva de vivienda pública en régimen de alquiler social.',
           objective: 'Contrapone el modelo de intervención pública directa, defendido por la izquierda como la solución estructural, frente a los modelos de la derecha que se centran en incentivos fiscales y colaboración público-privada para movilizar la oferta existente.',
@@ -407,6 +414,7 @@ const politicalData: PoliticalData = {
       questions: [
         {
           id: 'territorial-q1',
+          priority: 1,
           text: 'Financiación singular para Cataluña',
           description: 'Cataluña debe tener un modelo de financiación singular por el que recaude el 100% de los impuestos y pacte una cuota de solidaridad con el Estado.',
           objective: 'Esta pregunta aborda directamente la principal demanda actual de los partidos catalanistas. La respuesta no solo posiciona a los partidos en el eje territorial, sino que también revela su postura sobre los principios de igualdad y solidaridad interterritorial.',
@@ -470,6 +478,7 @@ const politicalData: PoliticalData = {
         },
         {
           id: 'territorial-q4',
+          priority: 1,
           text: 'Derecho de autodeterminación',
           description: 'Se debe reconocer el derecho de autodeterminación y facilitar la celebración de un referéndum de independencia en Cataluña y el País Vasco.',
           objective: 'Es la pregunta clave del soberanismo. Una respuesta afirmativa implica un cuestionamiento fundamental del artículo 2 de la Constitución sobre la "indisoluble unidad de la Nación española".',
@@ -491,6 +500,7 @@ const politicalData: PoliticalData = {
         },
         {
           id: 'territorial-q5',
+          priority: 3,
           text: 'Supresión del Concierto Vasco y Navarro',
           description: 'El Concierto Económico Vasco y el Convenio Navarro son un privilegio que debe ser suprimido.',
           objective: 'Cuestiona directamente los regímenes forales, un pilar del autogobierno vasco y navarro. Genera una clara división entre los partidos de ámbito estatal y los foralistas/nacionalistas vascos.',
@@ -534,6 +544,7 @@ const politicalData: PoliticalData = {
         questions: [
           {
             id: 'igualdad-q1',
+          priority: 1,
             text: 'Autodeterminación de género (Ley Trans)',
             description: 'La ley debe permitir la autodeterminación de género, posibilitando el cambio de sexo registral sin necesidad de informes médicos o psicológicos.',
             objective: 'Esta pregunta va al corazón de la Ley Trans y es uno de los mayores puntos de conflicto, incluso dentro de la izquierda. La respuesta revela la postura sobre los derechos de las personas trans y el debate entre sexo y género.',
@@ -597,6 +608,7 @@ const politicalData: PoliticalData = {
           },
           {
             id: 'igualdad-q4',
+          priority: 3,
             text: 'Ley del "solo sí es sí"',
             description: 'La ley del "solo sí es sí" fue un avance al poner el consentimiento en el centro, y no debería haberse modificado para reintroducir la violencia o intimidación como un factor clave.',
             objective: 'Esta pregunta mide la valoración de una de las leyes más polémicas de la última legislatura. Permite diferenciar entre quienes defienden el modelo original de Podemos y quienes apoyaron la posterior reforma liderada por el PSOE.',
@@ -618,6 +630,7 @@ const politicalData: PoliticalData = {
           },
           {
             id: 'igualdad-q5',
+          priority: 1,
             text: 'Control de fronteras vs. acogida',
             description: 'Se debe priorizar el control estricto de fronteras y la expulsión de inmigrantes en situación irregular, por encima de las políticas de acogida e integración.',
             objective: 'Esta pregunta aborda el dilema central de las políticas migratorias, enfrentando el enfoque de seguridad y "ley y orden" de la derecha con el enfoque de derechos humanos y solidaridad de la izquierda.',
@@ -661,6 +674,7 @@ const politicalData: PoliticalData = {
         questions: [
           {
             id: 'educacion-q1',
+          priority: 1,
             text: 'Financiación de la red pública vs. concertada',
             description: 'El Estado debe priorizar la financiación de la red educativa pública, limitando progresivamente los conciertos con centros privados.',
             objective: 'Mide la postura en el eje fundamental público-concertado, revelando el modelo de sociedad que se busca: uno basado en un servicio público universalista o uno basado en la elección individual y la colaboración público-privada.',
@@ -724,6 +738,7 @@ const politicalData: PoliticalData = {
           },
           {
             id: 'educacion-q4',
+          priority: 1,
             text: 'Protección de lenguas cooficiales',
             description: 'El uso de las lenguas cooficiales como lengua vehicular principal en la enseñanza (inmersión lingüística) debe ser protegido y garantizado.',
             objective: 'Evalúa la postura en el conflicto lingüístico-territorial, uno de los más sensibles y definitorios del panorama político.',
@@ -745,6 +760,7 @@ const politicalData: PoliticalData = {
           },
           {
             id: 'educacion-q5',
+          priority: 3,
             text: 'Subvenciones a la tauromaquia',
             description: 'La tauromaquia debe ser protegida como Bien de Interés Cultural y recibir subvenciones públicas.',
             objective: 'Es una pregunta de alto valor simbólico que mide la adhesión a una visión tradicional de la identidad cultural española frente a posturas animalistas y progresistas, a menudo correlacionadas con otros ejes ideológicos.',
@@ -788,6 +804,7 @@ const politicalData: PoliticalData = {
         questions: [
           {
             id: 'sanidad-q1',
+          priority: 1,
             text: 'Gestión pública vs. privada',
             description: 'La gestión de hospitales y centros de salud públicos debe ser exclusivamente pública, prohibiendo las concesiones a empresas privadas.',
             objective: 'Esta pregunta va al núcleo del debate ideológico sobre la "privatización" y el papel del sector privado en la sanidad pública.',
@@ -809,6 +826,7 @@ const politicalData: PoliticalData = {
           },
           {
             id: 'sanidad-q2',
+          priority: 1,
             text: 'Ampliación de servicios gratuitos',
             description: 'El sistema público de salud debe incorporar plenamente y de forma gratuita los servicios de salud bucodental, óptica, fisioterapia y salud mental.',
             objective: 'Mide el grado de ambición en la expansión del Estado del Bienestar y la concepción de la salud como un derecho integral, frente a una visión más restrictiva y centrada en la sostenibilidad financiera.',
@@ -915,6 +933,7 @@ const politicalData: PoliticalData = {
         questions: [
           {
             id: 'ecologia-q1',
+          priority: 1,
             text: 'Energía nuclear',
             description: 'España debería prolongar la vida de sus centrales nucleares y considerar la construcción de nuevas para garantizar la soberanía energética.',
             objective: 'Mide directamente la postura en el debate nuclear, un claro diferenciador ideológico entre bloques.',
@@ -936,6 +955,7 @@ const politicalData: PoliticalData = {
           },
           {
             id: 'ecologia-q2',
+          priority: 1,
             text: 'Normativa ambiental para el campo',
             description: 'Hay que relajar las normativas medioambientales europeas y nacionales para apoyar la competitividad del sector agrícola y ganadero.',
             objective: 'Mide la prioridad que se otorga a la protección del medio ambiente frente a las demandas del sector primario, capturando la tensión "campo vs. ecologismo".',
@@ -999,6 +1019,7 @@ const politicalData: PoliticalData = {
           },
           {
             id: 'ecologia-q5',
+          priority: 3,
             text: 'Protección de la caza',
             description: 'La caza es una actividad necesaria para el control de especies y el equilibrio del ecosistema, y debe ser protegida y fomentada.',
             objective: 'Pregunta simbólica que diferencia visiones del mundo rural, la tradición y la relación del ser humano con la naturaleza.',
@@ -1042,6 +1063,7 @@ const politicalData: PoliticalData = {
         questions: [
           {
             id: 'exterior-q1',
+          priority: 1,
             text: 'Gasto en defensa (2% PIB)',
             description: 'España debe aumentar su gasto en defensa hasta alcanzar el 2% del PIB, cumpliendo con el compromiso adquirido con la OTAN.',
             objective: 'Mide el grado de compromiso con la OTAN en términos presupuestarios, el indicador más tangible del atlantismo.',
@@ -1084,6 +1106,7 @@ const politicalData: PoliticalData = {
           },
           {
             id: 'exterior-q3',
+          priority: 1,
             text: 'Sanciones a Israel',
             description: 'El Gobierno español debe imponer sanciones a Israel y liderar una postura más contundente en la UE por sus acciones en Palestina.',
             objective: 'Mide la posición en uno de los conflictos internacionales más polarizantes y que mejor define la identidad de la izquierda.',
@@ -1190,6 +1213,7 @@ const politicalData: PoliticalData = {
           },
           {
             id: 'democracia-q2',
+          priority: 1,
             text: 'Elección de los jueces del CGPJ',
             description: 'El sistema de elección de los vocales del Consejo General del Poder Judicial (CGPJ) debe ser reformado para que sean los jueces y magistrados quienes elijan a la mayoría de sus miembros.',
             objective: 'Va al corazón del principal bloqueo institucional del país, midiendo la postura sobre la relación entre política y justicia.',
@@ -1232,6 +1256,7 @@ const politicalData: PoliticalData = {
           },
           {
             id: 'democracia-q4',
+          priority: 1,
             text: 'Leyes contra los "bulos"',
             description: 'El Gobierno debe impulsar leyes para combatir la difusión de "bulos" en medios y redes sociales, aunque suponga limitar la libertad de expresión.',
             objective: 'Mide la postura en el delicado equilibrio entre la lucha contra la desinformación y la protección de las libertades fundamentales.',

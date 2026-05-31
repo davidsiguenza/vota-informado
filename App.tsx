@@ -1,9 +1,9 @@
 
 import React, { useState, useMemo, useRef, useEffect } from 'react';
-import { UserAnswers, UserWeights, Stance, AffinityResult, Party, Question, CompassPoint, TopicAffinity, Point, PoliticalData, ChatMessage } from './types';
+import { UserAnswers, UserWeights, Stance, AffinityResult, Party, Question, CompassPoint, Point, PoliticalData, ChatMessage } from './types';
 import politicalData from './data/politicalData';
 import { SparklesIcon, ArrowLeftIcon, ArrowRightIcon, ChevronDownIcon, TrophyIcon, InfoIcon, PaperAirplaneIcon } from './components/IconComponents';
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell, ScatterChart, Scatter, ZAxis, Legend, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar, LabelList, Label } from 'recharts';
+import { XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell, ScatterChart, Scatter, ZAxis, Legend, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar, LabelList } from 'recharts';
 import { generateResultExplanation, generateVoteIntentionAnalysis, generateChatResponse } from './services/geminiService';
 
 // --- Helper Types ---
@@ -17,6 +17,23 @@ const LOCAL_STORAGE_KEYS = {
 };
 
 // --- Helper Components defined outside App to prevent re-renders ---
+
+
+const getSortedQuestions = (questions: Question[]) =>
+    [...questions].sort((a, b) => (a.priority ?? 2) - (b.priority ?? 2));
+
+const getReliabilityInfo = (answeredQuestions: number, totalQuestions: number) => {
+    if (answeredQuestions >= 40 || answeredQuestions === totalQuestions) {
+        return { label: 'Muy fiable', colorClass: 'text-green-700', bgClass: 'bg-green-100', detail: 'Has completado casi todo el cuestionario.' };
+    }
+    if (answeredQuestions >= 30) {
+        return { label: 'Fiable', colorClass: 'text-blue-700', bgClass: 'bg-blue-100', detail: 'Buen nivel de cobertura; puedes afinar más respondiendo el resto.' };
+    }
+    if (answeredQuestions >= 20) {
+        return { label: 'Orientativo', colorClass: 'text-amber-700', bgClass: 'bg-amber-100', detail: 'Suficiente para empezar; cuantas más preguntas respondas, mejor.' };
+    }
+    return { label: 'Incompleto', colorClass: 'text-gray-700', bgClass: 'bg-gray-100', detail: 'Responde al menos 2 preguntas por tema para ver resultados.' };
+};
 
 const Header: React.FC<{ onInfoClick: () => void }> = ({ onInfoClick }) => (
     <header className="bg-white shadow-md">
@@ -89,6 +106,7 @@ const QuestionnaireComponent: React.FC<{
 }> = ({ userAnswers, onAnswerChange, onBack, onComplete, onRandomFill, showPartyStances, isReviewMode = false }) => {
     const totalQuestions = politicalData.topics.flatMap(t => t.questions).length;
     const answeredQuestions = Object.values(userAnswers).filter(a => a !== undefined).length;
+    const reliability = getReliabilityInfo(answeredQuestions, totalQuestions);
 
     const [expandedTopics, setExpandedTopics] = useState<{[topicId: string]: boolean}>(() => {
         const initialState: {[topicId: string]: boolean} = {};
@@ -131,7 +149,7 @@ const QuestionnaireComponent: React.FC<{
                         </div>
                         <div className="bg-blue-50 border-l-4 border-blue-500 text-blue-800 p-4 rounded-r-lg mb-6" role="alert">
                             <p className="font-bold flex items-center gap-2"><InfoIcon className="w-5 h-5"/>Instrucción Importante</p>
-                            <p className="mt-1">Para ver los resultados, debes responder al menos <strong>2 preguntas de cada tema</strong>. Puedes expandir y contraer los temas para responder en el orden que prefieras.</p>
+                            <p className="mt-1">Para ver un primer resultado, responde las <strong>2 preguntas prioritarias de cada tema</strong>. Después puedes seguir completando preguntas para aumentar la fiabilidad.</p>
                         </div>
                     </>
                 )}
@@ -151,7 +169,7 @@ const QuestionnaireComponent: React.FC<{
                                             <div className={`text-sm font-medium flex items-center gap-2 mt-1 ${isRequirementMet ? 'text-green-600' : 'text-gray-500'}`}>
                                                 <span>{answeredInTopic} / {totalInTopic} respondidas</span>
                                                 {isRequirementMet && (
-                                                    <span className="px-2 py-0.5 bg-green-100 text-green-700 text-xs font-bold rounded-full">✓ Requisito cumplido</span>
+                                                    <span className="px-2 py-0.5 bg-green-100 text-green-700 text-xs font-bold rounded-full">✓ Modo rápido listo</span>
                                                 )}
                                             </div>
                                         </div>
@@ -160,7 +178,7 @@ const QuestionnaireComponent: React.FC<{
                                 </button>
                                 {expandedTopics[topic.id] && (
                                     <div className="space-y-6 mt-4 pt-4 border-t border-gray-200">
-                                        {topic.questions.map(q => (
+                                        {getSortedQuestions(topic.questions).map(q => (
                                             <QuestionComponent 
                                                 key={q.id} 
                                                 question={q} 
@@ -186,7 +204,10 @@ const QuestionnaireComponent: React.FC<{
                             <ArrowLeftIcon className="w-5 h-5" />
                         </button>
                         <div className="flex flex-col items-center">
-                            <div className="text-sm font-semibold text-gray-800">{answeredQuestions} de {totalQuestions} respondidas</div>
+                            <div className="flex items-center gap-2 text-sm font-semibold text-gray-800">
+                                <span>{answeredQuestions} de {totalQuestions} respondidas</span>
+                                <span className={`px-2 py-0.5 rounded-full text-xs font-bold ${reliability.bgClass} ${reliability.colorClass}`}>{reliability.label}</span>
+                            </div>
                             <div className="w-56 h-2 bg-gray-300 rounded-full overflow-hidden mt-1">
                                 <div 
                                     className="h-full bg-indigo-500 transition-all duration-500 ease-out" 
@@ -468,6 +489,7 @@ const ResultsComponent: React.FC<{
     answeredQuestions: number;
     totalQuestions: number;
 }> = ({ affinityResults, userAnswers, onAnswerChange, userWeights, onWeightChange, answeredQuestions, totalQuestions }) => {
+    const reliability = getReliabilityInfo(answeredQuestions, totalQuestions);
     
     // Main Tab State
     type MainTab = 'principal' | 'ajustes' | 'posturas' | 'ia';
@@ -714,7 +736,7 @@ const ResultsComponent: React.FC<{
                         <InfoIcon className="w-8 h-8 flex-shrink-0 text-amber-500" />
                         <div>
                              <p>
-                                Llevas <strong>{answeredQuestions}/{totalQuestions}</strong> preguntas respondidas. Esto puede hacer que los resultados no sean del todo precisos.
+                                Fiabilidad actual: <strong>{reliability.label}</strong> ({answeredQuestions}/{totalQuestions} preguntas). {reliability.detail}
                             </p>
                             <p className="mt-1">
                                 Si lo deseas, puedes{' '}
