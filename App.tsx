@@ -29,6 +29,12 @@ const getLocalStorageKeys = (countryCode: string, locale: string) => {
     };
 };
 
+const LEGACY_LOCAL_STORAGE_KEYS = {
+    VIEW: 'votaInformado-view',
+    ANSWERS: 'votaInformado-answers',
+    WEIGHTS: 'votaInformado-weights',
+};
+
 // --- Helper Components defined outside App to prevent re-renders ---
 
 
@@ -1087,7 +1093,15 @@ const ResultsComponent: React.FC<{
     );
 };
 
-const AboutComponent: React.FC<{ onBack: () => void; onClearStorage: () => void; }> = ({ onBack, onClearStorage }) => (
+const AboutComponent: React.FC<{
+    onBack: () => void;
+    onClearStorage: () => void;
+    onExportData: () => void;
+    onImportData: (file: File) => void;
+}> = ({ onBack, onClearStorage, onExportData, onImportData }) => {
+    const importInputRef = useRef<HTMLInputElement>(null);
+
+    return (
     <div className="max-w-4xl mx-auto p-8 bg-white rounded-xl shadow-lg mt-8">
         <h2 className="text-3xl font-bold text-gray-800 mb-2">Acerca de Vota Informado</h2>
         <p className="text-lg text-gray-600 mb-8 border-b pb-4">Transparencia en nuestra Metodología</p>
@@ -1133,16 +1147,41 @@ const AboutComponent: React.FC<{ onBack: () => void; onClearStorage: () => void;
             </div>
 
              <div>
-                <h3 className="text-2xl font-semibold text-gray-700 mb-3 mt-8 pt-6 border-t">Reiniciar Aplicación</h3>
+                <h3 className="text-2xl font-semibold text-gray-700 mb-3 mt-8 pt-6 border-t">Guardar, importar y reiniciar</h3>
                 <p className="text-gray-600 mb-4">
-                    Si deseas comenzar el cuestionario desde cero, puedes borrar todos los datos guardados en tu navegador. Esta acción no se puede deshacer.
+                    Tus respuestas se guardan en este navegador. Puedes exportarlas a un archivo JSON para recuperarlas tras limpiar caché o moverlas a otro dispositivo.
                 </p>
-                <button
-                    onClick={onClearStorage}
-                    className="bg-red-600 text-white font-bold py-2 px-6 rounded-lg hover:bg-red-700 transition-colors shadow-md"
-                >
-                    Limpiar memoria y reiniciar
-                </button>
+                <div className="flex flex-wrap gap-3">
+                    <button
+                        onClick={onExportData}
+                        className="bg-emerald-600 text-white font-bold py-2 px-6 rounded-lg hover:bg-emerald-700 transition-colors shadow-md"
+                    >
+                        Exportar mis datos
+                    </button>
+                    <button
+                        onClick={() => importInputRef.current?.click()}
+                        className="bg-indigo-600 text-white font-bold py-2 px-6 rounded-lg hover:bg-indigo-700 transition-colors shadow-md"
+                    >
+                        Importar datos
+                    </button>
+                    <input
+                        ref={importInputRef}
+                        type="file"
+                        accept="application/json,.json"
+                        className="hidden"
+                        onChange={(event) => {
+                            const file = event.target.files?.[0];
+                            if (file) onImportData(file);
+                            event.target.value = '';
+                        }}
+                    />
+                    <button
+                        onClick={onClearStorage}
+                        className="bg-red-600 text-white font-bold py-2 px-6 rounded-lg hover:bg-red-700 transition-colors shadow-md"
+                    >
+                        Limpiar memoria y reiniciar
+                    </button>
+                </div>
             </div>
         </div>
 
@@ -1155,7 +1194,8 @@ const AboutComponent: React.FC<{ onBack: () => void; onClearStorage: () => void;
             </button>
         </div>
     </div>
-);
+    );
+};
 
 
 const App: React.FC = () => {
@@ -1177,13 +1217,15 @@ const App: React.FC = () => {
     const createInitialWeights = (data: PoliticalData): UserWeights =>
         data.topics.reduce((acc, topic) => ({ ...acc, [topic.id]: 2 }), {} as UserWeights);
 
+    const canUseLegacyStorage = selectedCountryCode === 'ES' && selectedLocale === 'es-ES';
+
     const loadSavedView = (keys: ReturnType<typeof getLocalStorageKeys>): View => {
         try {
-            const savedAnswersRaw = localStorage.getItem(keys.ANSWERS);
+            const savedAnswersRaw = localStorage.getItem(keys.ANSWERS) || (canUseLegacyStorage ? localStorage.getItem(LEGACY_LOCAL_STORAGE_KEYS.ANSWERS) : null);
             if (savedAnswersRaw) {
                 const savedAnswers = JSON.parse(savedAnswersRaw);
                 if (Object.values(savedAnswers).some(a => a !== undefined)) {
-                    const savedView = localStorage.getItem(keys.VIEW) as View | null;
+                    const savedView = (localStorage.getItem(keys.VIEW) || (canUseLegacyStorage ? localStorage.getItem(LEGACY_LOCAL_STORAGE_KEYS.VIEW) : null)) as View | null;
                     if (savedView && savedView !== 'about') return savedView;
                     return 'results';
                 }
@@ -1196,7 +1238,7 @@ const App: React.FC = () => {
 
     const loadSavedAnswers = (keys: ReturnType<typeof getLocalStorageKeys>, data: PoliticalData): UserAnswers => {
         try {
-            const savedAnswers = localStorage.getItem(keys.ANSWERS);
+            const savedAnswers = localStorage.getItem(keys.ANSWERS) || (canUseLegacyStorage ? localStorage.getItem(LEGACY_LOCAL_STORAGE_KEYS.ANSWERS) : null);
             if (savedAnswers) {
                 const parsedAnswers = JSON.parse(savedAnswers);
                 if (Object.keys(parsedAnswers).length > 0) return parsedAnswers;
@@ -1210,7 +1252,7 @@ const App: React.FC = () => {
 
     const loadSavedWeights = (keys: ReturnType<typeof getLocalStorageKeys>, data: PoliticalData): UserWeights => {
         try {
-            const savedWeights = localStorage.getItem(keys.WEIGHTS);
+            const savedWeights = localStorage.getItem(keys.WEIGHTS) || (canUseLegacyStorage ? localStorage.getItem(LEGACY_LOCAL_STORAGE_KEYS.WEIGHTS) : null);
             if (savedWeights) {
                  const parsedWeights = JSON.parse(savedWeights);
                  if (Object.keys(parsedWeights).length > 0) return parsedWeights;
@@ -1310,6 +1352,62 @@ const App: React.FC = () => {
             }
         }
     };
+
+    const handleExportData = () => {
+        const exportPayload = {
+            schema: 'vota-informado-progress-v1',
+            exportedAt: new Date().toISOString(),
+            countryCode: selectedCountryCode,
+            locale: selectedLocale,
+            view: view === 'about' ? 'results' : view,
+            answers: userAnswers,
+            weights: userWeights,
+        };
+        const blob = new Blob([JSON.stringify(exportPayload, null, 2)], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = `vota-informado-${selectedCountryCode}-${selectedLocale}-${new Date().toISOString().slice(0, 10)}.json`;
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+        URL.revokeObjectURL(url);
+    };
+
+    const handleImportData = (file: File) => {
+        const reader = new FileReader();
+        reader.onload = () => {
+            try {
+                const payload = JSON.parse(String(reader.result));
+                if (payload.schema !== 'vota-informado-progress-v1' || !payload.answers || !payload.weights) {
+                    throw new Error('Formato de archivo no reconocido');
+                }
+                const nextCountryCode = payload.countryCode || selectedCountryCode;
+                const nextCountry = countryRegistry.find(country => country.code === nextCountryCode);
+                if (!nextCountry) throw new Error(`País no soportado: ${nextCountryCode}`);
+                const nextLocale = nextCountry.supportedLocales.includes(payload.locale) ? payload.locale : nextCountry.defaultLocale;
+                const nextKeys = getLocalStorageKeys(nextCountry.code, nextLocale);
+                const nextView = (payload.view && payload.view !== 'about' ? payload.view : 'results') as View;
+
+                localStorage.setItem('votaInformado-country', nextCountry.code);
+                localStorage.setItem('votaInformado-locale', nextLocale);
+                localStorage.setItem(nextKeys.ANSWERS, JSON.stringify(payload.answers));
+                localStorage.setItem(nextKeys.WEIGHTS, JSON.stringify(payload.weights));
+                localStorage.setItem(nextKeys.VIEW, nextView);
+
+                setSelectedCountryCode(nextCountry.code);
+                setSelectedLocale(nextLocale);
+                setUserAnswers(payload.answers);
+                setUserWeights(payload.weights);
+                setView(nextView);
+                alert('Datos importados correctamente.');
+            } catch (error) {
+                console.error('Failed to import progress', error);
+                alert('No he podido importar ese archivo. Asegúrate de que es un JSON exportado desde Vota Informado.');
+            }
+        };
+        reader.readAsText(file);
+    };
     
     const affinityResults = useMemo<AffinityResult[]>(() => {
         const affinityScores: { [party in Party]?: { [topicId: string]: { score: number; count: number } } } = {};
@@ -1368,7 +1466,9 @@ const App: React.FC = () => {
                                  const savedView = localStorage.getItem(storageKeys.VIEW) as View | null;
                                  setView(savedView || 'weights');
                             }} 
-                            onClearStorage={() => handleClearStorage()} 
+                            onClearStorage={() => handleClearStorage()}
+                            onExportData={handleExportData}
+                            onImportData={handleImportData}
                         />;
             default:
                 return <TopicWeightsComponent userWeights={userWeights} onWeightChange={handleWeightChange} onNext={() => setView('questionnaire')} />;
