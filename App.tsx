@@ -19,6 +19,42 @@ const politicalDataByCountry: Record<string, PoliticalData> = {
 };
 
 let politicalData: PoliticalData = politicalDataByCountry[activeCountryCode] ?? esPoliticalData;
+let currentLocale = activeLocale;
+
+const uiText = {
+    es: {
+        subtitle: 'Descubre tu afinidad política en', country: 'País', language: 'Idioma',
+        step1Title: 'Paso 1: ¿Qué temas te importan más?', step1Desc: 'Ajusta la importancia de cada tema. Esto ayudará a ponderar tus resultados finales.',
+        lowImportance: 'Poco importante', normalImportance: 'Normal', highImportance: 'Muy importante', goQuestionnaire: 'Ir al Cuestionario',
+        step2Title: 'Paso 2: El Cuestionario', randomFill: 'Relleno Aleatorio (Test)', importantInstruction: 'Instrucción Importante',
+        quickModeHelp: 'Para ver un primer resultado, responde las 2 preguntas prioritarias de cada tema. Después puedes seguir completando preguntas para aumentar la fiabilidad.',
+        answered: 'respondidas', quickReady: '✓ Modo rápido listo', of: 'de',
+        priority1: 'Prioritaria', priority2: 'Recomendada', priority3: 'Profundización',
+        priority1Desc: 'Sale en el modo rápido porque discrimina mucho o es muy actual.', priority2Desc: 'Aporta precisión adicional al resultado.', priority3Desc: 'Pregunta más específica o de nicho para afinar el perfil.',
+        stronglyDisagree: 'Totalmente en desacuerdo', disagree: 'En desacuerdo', neutral: 'Neutral', agree: 'De acuerdo', stronglyAgree: 'Totalmente de acuerdo', unknown: 'No sabe / No contesta', viewPartyStances: 'Ver postura de los partidos',
+        mainPanel: 'Panel Principal', adjustments: 'Ajustes y Respuestas', methodology: 'Metodología y fuentes', partyPositions: 'Posturas de Partidos', aiAnalysis: 'Análisis con IA',
+        affinityResults: 'Resultados de Afinidad', compass: 'Brújula Ideológica', radar: 'Afinidad por Tema', myAnswers: 'Mis Respuestas', topicWeights: 'Ponderación de Temas',
+        yourAffinityResults: 'Tus Resultados de Afinidad', internationalSimilarities: 'Similitudes internacionales · experimental', notOneToOne: 'No son equivalencias 1:1.',
+        exportData: 'Exportar mis datos', importData: 'Importar datos', clearRestart: 'Limpiar memoria y reiniciar',
+    },
+    en: {
+        subtitle: 'Discover your political affinity in', country: 'Country', language: 'Language',
+        step1Title: 'Step 1: Which issues matter most to you?', step1Desc: 'Adjust the importance of each issue. This will weight your final results.',
+        lowImportance: 'Less important', normalImportance: 'Normal', highImportance: 'Very important', goQuestionnaire: 'Go to questionnaire',
+        step2Title: 'Step 2: The questionnaire', randomFill: 'Random fill (test)', importantInstruction: 'Important instruction',
+        quickModeHelp: 'To see a first result, answer the 2 priority questions in each topic. You can then keep answering to improve reliability.',
+        answered: 'answered', quickReady: '✓ Quick mode ready', of: 'of',
+        priority1: 'Priority', priority2: 'Recommended', priority3: 'Deep dive',
+        priority1Desc: 'Included in quick mode because it is highly discriminating or very current.', priority2Desc: 'Adds extra precision to the result.', priority3Desc: 'More specific/niche question to fine-tune the profile.',
+        stronglyDisagree: 'Strongly disagree', disagree: 'Disagree', neutral: 'Neutral', agree: 'Agree', stronglyAgree: 'Strongly agree', unknown: 'Don’t know / No answer', viewPartyStances: 'View party positions',
+        mainPanel: 'Main panel', adjustments: 'Settings and answers', methodology: 'Methodology and sources', partyPositions: 'Party positions', aiAnalysis: 'AI analysis',
+        affinityResults: 'Affinity results', compass: 'Ideological compass', radar: 'Affinity by topic', myAnswers: 'My answers', topicWeights: 'Topic weights',
+        yourAffinityResults: 'Your affinity results', internationalSimilarities: 'International similarities · experimental', notOneToOne: 'These are not 1:1 equivalences.',
+        exportData: 'Export my data', importData: 'Import data', clearRestart: 'Clear memory and restart',
+    },
+} as const;
+
+const t = (key: keyof typeof uiText.es) => (currentLocale.startsWith('en') ? uiText.en[key] : uiText.es[key]);
 
 const getLocalStorageKeys = (countryCode: string, locale: string) => {
     const storagePrefix = `votaInformado-${countryCode}-${locale}`;
@@ -39,10 +75,10 @@ const LEGACY_LOCAL_STORAGE_KEYS = {
 
 
 
-const QUESTION_PRIORITY_META: Record<QuestionPriority, { label: string; description: string; className: string }> = {
-    1: { label: 'Prioritaria', description: 'Sale en el modo rápido porque discrimina mucho o es muy actual.', className: 'bg-indigo-100 text-indigo-700 border-indigo-200' },
-    2: { label: 'Recomendada', description: 'Aporta precisión adicional al resultado.', className: 'bg-slate-100 text-slate-700 border-slate-200' },
-    3: { label: 'Profundización', description: 'Pregunta más específica o de nicho para afinar el perfil.', className: 'bg-purple-100 text-purple-700 border-purple-200' },
+const QUESTION_PRIORITY_META: Record<QuestionPriority, { labelKey: keyof typeof uiText.es; descriptionKey: keyof typeof uiText.es; className: string }> = {
+    1: { labelKey: 'priority1', descriptionKey: 'priority1Desc', className: 'bg-indigo-100 text-indigo-700 border-indigo-200' },
+    2: { labelKey: 'priority2', descriptionKey: 'priority2Desc', className: 'bg-slate-100 text-slate-700 border-slate-200' },
+    3: { labelKey: 'priority3', descriptionKey: 'priority3Desc', className: 'bg-purple-100 text-purple-700 border-purple-200' },
 };
 
 const getQuestionPriorityMeta = (priority: Question['priority'] = 2) => QUESTION_PRIORITY_META[priority];
@@ -79,9 +115,9 @@ const Header: React.FC<{
                 <SparklesIcon className="w-10 h-10 text-indigo-600" />
                 Vota Informado
             </h1>
-            <p className="mt-2 text-center text-lg text-gray-600">Descubre tu afinidad política en {politicalData.country?.name ?? 'tu país'}</p>
+            <p className="mt-2 text-center text-lg text-gray-600">{t('subtitle')} {politicalData.country?.name ?? 'tu país'}</p>
             <div className="mt-4 flex justify-center">
-                <label className="sr-only" htmlFor="country-selector">País</label>
+                <label className="sr-only" htmlFor="country-selector">{t('country')}</label>
                 <select
                     id="country-selector"
                     value={selectedCountryCode}
@@ -95,7 +131,7 @@ const Header: React.FC<{
                         </option>
                     ))}
                 </select>
-                <label className="sr-only" htmlFor="locale-selector">Idioma</label>
+                <label className="sr-only" htmlFor="locale-selector">{t('language')}</label>
                 <select
                     id="locale-selector"
                     value={selectedLocale}
@@ -126,8 +162,8 @@ const TopicWeightsComponent: React.FC<{
     onNext: () => void;
 }> = ({ userWeights, onWeightChange, onNext }) => (
     <div className="max-w-4xl mx-auto p-8 bg-white rounded-xl shadow-lg mt-8">
-        <h2 className="text-2xl font-bold text-gray-800 mb-2">Paso 1: ¿Qué temas te importan más?</h2>
-        <p className="text-gray-600 mb-6">Ajusta la importancia de cada tema. Esto ayudará a ponderar tus resultados finales.</p>
+        <h2 className="text-2xl font-bold text-gray-800 mb-2">{t('step1Title')}</h2>
+        <p className="text-gray-600 mb-6">{t('step1Desc')}</p>
         <div className="space-y-6">
             {politicalData.topics.map(topic => (
                 <div key={topic.id} className="p-4 border border-gray-200 rounded-lg">
@@ -144,9 +180,9 @@ const TopicWeightsComponent: React.FC<{
                         className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-indigo-600"
                     />
                     <div className="flex justify-between text-xs text-gray-500 mt-1">
-                        <span>Poco importante</span>
-                        <span>Normal</span>
-                        <span>Muy importante</span>
+                        <span>{t('lowImportance')}</span>
+                        <span>{t('normalImportance')}</span>
+                        <span>{t('highImportance')}</span>
                     </div>
                 </div>
             ))}
@@ -155,7 +191,7 @@ const TopicWeightsComponent: React.FC<{
             <button
                 onClick={onNext}
                 className="bg-indigo-600 text-white font-bold py-3 px-8 rounded-lg hover:bg-indigo-700 transition-colors shadow-md">
-                Ir al Cuestionario
+                {t('goQuestionnaire')}
             </button>
         </div>
     </div>
@@ -202,20 +238,20 @@ const QuestionnaireComponent: React.FC<{
                 {!isReviewMode && (
                     <>
                         <div className="flex justify-between items-center mb-4">
-                            <h2 className="text-2xl font-bold text-gray-800">Paso 2: El Cuestionario</h2>
+                            <h2 className="text-2xl font-bold text-gray-800">{t('step2Title')}</h2>
                             {onRandomFill && (
                                 <button
                                     onClick={onRandomFill}
                                     className="bg-yellow-400 text-yellow-900 font-bold py-2 px-4 rounded-lg hover:bg-yellow-500 transition-colors text-sm"
                                     title="Rellenar aleatoriamente para pruebas"
                                 >
-                                    Relleno Aleatorio (Test)
+                                    {t('randomFill')}
                                 </button>
                             )}
                         </div>
                         <div className="bg-blue-50 border-l-4 border-blue-500 text-blue-800 p-4 rounded-r-lg mb-6" role="alert">
-                            <p className="font-bold flex items-center gap-2"><InfoIcon className="w-5 h-5"/>Instrucción Importante</p>
-                            <p className="mt-1">Para ver un primer resultado, responde las <strong>2 preguntas prioritarias de cada tema</strong>. Después puedes seguir completando preguntas para aumentar la fiabilidad.</p>
+                            <p className="font-bold flex items-center gap-2"><InfoIcon className="w-5 h-5"/>{t('importantInstruction')}</p>
+                            <p className="mt-1">{t('quickModeHelp')}</p>
                         </div>
                     </>
                 )}
@@ -233,9 +269,9 @@ const QuestionnaireComponent: React.FC<{
                                         <div className="text-left">
                                             <h3 className="text-xl font-bold text-gray-700">{topic.title}</h3>
                                             <div className={`text-sm font-medium flex items-center gap-2 mt-1 ${isRequirementMet ? 'text-green-600' : 'text-gray-500'}`}>
-                                                <span>{answeredInTopic} / {totalInTopic} respondidas</span>
+                                                <span>{answeredInTopic} / {totalInTopic} {t('answered')}</span>
                                                 {isRequirementMet && (
-                                                    <span className="px-2 py-0.5 bg-green-100 text-green-700 text-xs font-bold rounded-full">✓ Modo rápido listo</span>
+                                                    <span className="px-2 py-0.5 bg-green-100 text-green-700 text-xs font-bold rounded-full">{t('quickReady')}</span>
                                                 )}
                                             </div>
                                         </div>
@@ -271,7 +307,7 @@ const QuestionnaireComponent: React.FC<{
                         </button>
                         <div className="flex flex-col items-center">
                             <div className="flex items-center gap-2 text-sm font-semibold text-gray-800">
-                                <span>{answeredQuestions} de {totalQuestions} respondidas</span>
+                                <span>{answeredQuestions} {t('of')} {totalQuestions} {t('answered')}</span>
                                 <span className={`px-2 py-0.5 rounded-full text-xs font-bold ${reliability.bgClass} ${reliability.colorClass}`}>{reliability.label}</span>
                             </div>
                             <div className="w-56 h-2 bg-gray-300 rounded-full overflow-hidden mt-1">
@@ -303,7 +339,7 @@ const QuestionComponent: React.FC<{
 }> = ({ question, userAnswer, onAnswerChange, showPartyStances }) => {
     const [isExpanded, setIsExpanded] = useState(false);
     const stances: Stance[] = [-2, -1, 0, 1, 2];
-    const labels = ['Totalmente en desacuerdo', 'En desacuerdo', 'Neutral', 'De acuerdo', 'Totalmente de acuerdo'];
+    const labels = [t('stronglyDisagree'), t('disagree'), t('neutral'), t('agree'), t('stronglyAgree')];
 
     const priorityMeta = getQuestionPriorityMeta(question.priority);
 
@@ -313,39 +349,42 @@ const QuestionComponent: React.FC<{
                 <p className="font-semibold text-gray-800">{question.text}</p>
                 <span
                     className={`inline-flex items-center rounded-full border px-2 py-0.5 text-[11px] font-bold uppercase tracking-wide ${priorityMeta.className}`}
-                    title={priorityMeta.description}
+                    title={t(priorityMeta.descriptionKey)}
                 >
-                    {priorityMeta.label}
+                    {t(priorityMeta.labelKey)}
                 </span>
             </div>
             <p className="text-sm text-gray-600 mb-4">{question.description}</p>
             
-            <div className="flex flex-col sm:flex-row justify-between items-center mb-2 space-y-2 sm:space-y-0">
-                <span className="text-xs text-red-600 font-medium">{labels[0]}</span>
-                <div className="flex items-center space-x-2">
+            <div className="mb-2">
+                <div className="mx-auto flex max-w-sm items-center justify-between text-xs font-medium mb-2">
+                    <span className="text-red-600 text-left">{labels[0]}</span>
+                    <span className="text-green-600 text-right">{labels[4]}</span>
+                </div>
+                <div className="flex items-center justify-center space-x-2">
                     {stances.map((stance, index) => (
                         <button
                             key={stance}
                             onClick={() => onAnswerChange(question.id, stance)}
                             className={`w-8 h-8 rounded-full transition-transform transform hover:scale-110 ${userAnswer === stance ? 'bg-indigo-600 ring-2 ring-offset-2 ring-indigo-500' : 'bg-gray-300'}`}
                             title={labels[index]}
+                            aria-label={labels[index]}
                         ></button>
                     ))}
                 </div>
-                <span className="text-xs text-green-600 font-medium">{labels[4]}</span>
             </div>
             <div className="flex justify-center mt-3">
                  <button 
                     onClick={() => onAnswerChange(question.id, null)}
                     className={`text-sm px-4 py-1 rounded-full transition ${userAnswer === null ? 'bg-yellow-400 text-yellow-900 font-bold' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'}`}>
-                    No sabe / No contesta
+                    {t('unknown')}
                 </button>
             </div>
 
             {showPartyStances && (
                 <div className="mt-4">
                     <button onClick={() => setIsExpanded(!isExpanded)} className="text-sm text-indigo-600 hover:text-indigo-800 flex items-center gap-1">
-                        Ver postura de los partidos
+                        {t('viewPartyStances')}
                         <svg className={`w-4 h-4 transition-transform ${isExpanded ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7"></path></svg>
                     </button>
                     {isExpanded && (
@@ -798,11 +837,11 @@ const ResultsComponent: React.FC<{
     );
     
     const mainTabs = [
-      { key: 'principal', label: 'Panel Principal' },
-      { key: 'ajustes', label: 'Ajustes y Respuestas' },
-      { key: 'metodologia', label: 'Metodología y fuentes' },
-      { key: 'posturas', label: 'Posturas de Partidos' },
-      { key: 'ia', label: 'Análisis con IA' },
+      { key: 'principal', label: t('mainPanel') },
+      { key: 'ajustes', label: t('adjustments') },
+      { key: 'metodologia', label: t('methodology') },
+      { key: 'posturas', label: t('partyPositions') },
+      { key: 'ia', label: t('aiAnalysis') },
     ];
 
     return (
@@ -853,23 +892,23 @@ const ResultsComponent: React.FC<{
                     {mainResultTab === 'principal' && (
                         <div>
                             {renderSubTabs([
-                                {key: 'afinidad', label: 'Resultados de Afinidad'},
-                                {key: 'brújula', label: 'Brújula Ideológica'},
-                                {key: 'radar', label: 'Afinidad por Tema'}
+                                {key: 'afinidad', label: t('affinityResults')},
+                                {key: 'brújula', label: t('compass')},
+                                {key: 'radar', label: t('radar')}
                             ], principalSubTab, setPrincipalSubTab)}
 
                             {principalSubTab === 'afinidad' && (
                                 <div className="py-6">
                                     <div className="flex items-center justify-center gap-2 mb-4">
-                                        <h2 className="text-3xl font-bold text-gray-800">Tus Resultados de Afinidad</h2>
+                                        <h2 className="text-3xl font-bold text-gray-800">{t('yourAffinityResults')}</h2>
                                         <button onClick={() => handleOpenModal(infoContent.affinity.title, infoContent.affinity.content)} className="text-gray-400 hover:text-indigo-600"><InfoIcon className="w-6 h-6"/></button>
                                     </div>
                                     <AffinityRankingList affinityResults={affinityResults} />
                                     {topPartyInternationalSimilarities.length > 0 && (
                                         <div className="mt-8 rounded-xl border border-indigo-100 bg-indigo-50 p-5">
-                                            <h3 className="text-lg font-bold text-indigo-900">Similitudes internacionales · experimental</h3>
+                                            <h3 className="text-lg font-bold text-indigo-900">{t('internationalSimilarities')}</h3>
                                             <p className="mt-1 text-sm text-indigo-800">
-                                                Como tu mayor afinidad ahora mismo es con <strong>{topParty}</strong>, estas serían referencias aproximadas para Estados Unidos. No son equivalencias 1:1.
+                                                {currentLocale.startsWith('en') ? <>Because your current top match is <strong>{topParty}</strong>, these are approximate references for other countries. {t('notOneToOne')}</> : <>Como tu mayor afinidad ahora mismo es con <strong>{topParty}</strong>, estas serían referencias aproximadas para Estados Unidos. {t('notOneToOne')}</>}
                                             </p>
                                             <div className="mt-4 grid gap-3 md:grid-cols-2">
                                                 {topPartyInternationalSimilarities.map(match => (
@@ -898,8 +937,8 @@ const ResultsComponent: React.FC<{
                     {mainResultTab === 'ajustes' && (
                         <div>
                             {renderSubTabs([
-                                {key: 'respuestas', label: 'Mis Respuestas'},
-                                {key: 'ponderacion', label: 'Ponderación de Temas'}
+                                {key: 'respuestas', label: t('myAnswers')},
+                                {key: 'ponderacion', label: t('topicWeights')}
                             ], ajustesSubTab, setAjustesSubTab)}
 
                             {ajustesSubTab === 'respuestas' && (
@@ -1156,13 +1195,13 @@ const AboutComponent: React.FC<{
                         onClick={onExportData}
                         className="bg-emerald-600 text-white font-bold py-2 px-6 rounded-lg hover:bg-emerald-700 transition-colors shadow-md"
                     >
-                        Exportar mis datos
+                        {t('exportData')}
                     </button>
                     <button
                         onClick={() => importInputRef.current?.click()}
                         className="bg-indigo-600 text-white font-bold py-2 px-6 rounded-lg hover:bg-indigo-700 transition-colors shadow-md"
                     >
-                        Importar datos
+                        {t('importData')}
                     </button>
                     <input
                         ref={importInputRef}
@@ -1179,7 +1218,7 @@ const AboutComponent: React.FC<{
                         onClick={onClearStorage}
                         className="bg-red-600 text-white font-bold py-2 px-6 rounded-lg hover:bg-red-700 transition-colors shadow-md"
                     >
-                        Limpiar memoria y reiniciar
+                        {t('clearRestart')}
                     </button>
                 </div>
             </div>
@@ -1205,6 +1244,7 @@ const App: React.FC = () => {
 
     const currentPoliticalData = politicalDataByCountry[selectedCountryCode] ?? esPoliticalData;
     politicalData = currentPoliticalData;
+    currentLocale = selectedLocale;
 
     const storageKeys = useMemo(() => getLocalStorageKeys(selectedCountryCode, selectedLocale), [selectedCountryCode, selectedLocale]);
 
@@ -1286,6 +1326,7 @@ const App: React.FC = () => {
         const nextData = politicalDataByCountry[selectedCountryCode] ?? esPoliticalData;
         const nextKeys = getLocalStorageKeys(selectedCountryCode, selectedLocale);
         politicalData = nextData;
+        currentLocale = selectedLocale;
         setUserAnswers(loadSavedAnswers(nextKeys, nextData));
         setUserWeights(loadSavedWeights(nextKeys, nextData));
         setView(loadSavedView(nextKeys));
