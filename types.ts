@@ -1,23 +1,63 @@
 import React from 'react';
 
-export enum Party {
-  PP = 'PP',
-  PSOE = 'PSOE',
-  VOX = 'Vox',
-  SUMAR = 'Sumar',
-  PODEMOS = 'Podemos',
-  ERC = 'ERC',
-  JUNTS = 'Junts',
-  EH_BILDU = 'EH Bildu',
-  PNV = 'PNV',
-  BNG = 'BNG',
-  CC = 'CC',
-  UPN = 'UPN',
+export const Party = {
+  PP: 'PP',
+  PSOE: 'PSOE',
+  VOX: 'Vox',
+  SUMAR: 'Sumar',
+  PODEMOS: 'Podemos',
+  ERC: 'ERC',
+  JUNTS: 'Junts',
+  EH_BILDU: 'EH Bildu',
+  PNV: 'PNV',
+  BNG: 'BNG',
+  CC: 'CC',
+  UPN: 'UPN',
+} as const;
+
+// String union widened on purpose: Spain keeps the convenient Party.PP syntax,
+// while future countries can add parties without touching core app types.
+export type Party = (typeof Party)[keyof typeof Party] | string;
+
+export type CountryCode = 'ES' | 'US' | string;
+export type LocaleCode = `${string}-${string}` | string;
+
+export type IdeologyAxisId =
+  | 'economic'
+  | 'social'
+  | 'territorial'
+  | 'immigration'
+  | 'climate'
+  | 'globalism'
+  | 'security'
+  | 'institutionalTrust'
+  | string;
+
+export interface IdeologyAxis {
+  id: IdeologyAxisId;
+  label: string;
+  leftLabel: string;
+  rightLabel: string;
+  description?: string;
 }
+
+export type IdeologyVector = Partial<Record<IdeologyAxisId, number>>; // -10..10
 
 export interface PartyInfo {
   name: Party;
   color: string;
+  id?: string;
+  countryCode?: CountryCode;
+  family?: string;
+  ideologyVector?: IdeologyVector;
+  similarTo?: CrossCountryPartySimilarity[];
+}
+
+export interface CrossCountryPartySimilarity {
+  countryCode: CountryCode;
+  party: Party;
+  score: number; // 0..100, approximate ideological similarity
+  rationale?: string;
 }
 
 export type Stance = -2 | -1 | 0 | 1 | 2; // -2: Totally Disagree, 2: Totally Agree
@@ -60,8 +100,24 @@ export interface Topic {
 }
 
 export interface PoliticalData {
+  country?: CountryConfig;
+  ideologyAxes?: IdeologyAxis[];
   topics: Topic[];
   parties: PartyInfo[];
+}
+
+export interface CountryConfig {
+  code: CountryCode;
+  name: string;
+  defaultLocale: LocaleCode;
+  supportedLocales: LocaleCode[];
+  politicalSystem: string;
+  status: 'active' | 'planned' | 'draft';
+  notes?: string;
+}
+
+export interface CountryRegistryItem extends CountryConfig {
+  displayName: Record<LocaleCode, string>;
 }
 
 export interface UserAnswers {

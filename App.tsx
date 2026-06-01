@@ -1,7 +1,10 @@
 
 import React, { useState, useMemo, useRef, useEffect } from 'react';
 import { UserAnswers, UserWeights, Stance, AffinityResult, Party, Question, QuestionPriority, CompassPoint, Point, PoliticalData, ChatMessage } from './types';
-import politicalData from './data/politicalData';
+import esPoliticalData from './data/politicalData';
+import usPoliticalData from './data/usPoliticalData';
+import { activeCountryCode, activeLocale, countryRegistry } from './data/countryRegistry';
+import { internationalSimilarities } from './data/internationalSimilarities';
 import { SparklesIcon, ArrowLeftIcon, ArrowRightIcon, ChevronDownIcon, TrophyIcon, InfoIcon, PaperAirplaneIcon } from './components/IconComponents';
 import { XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell, ScatterChart, Scatter, ZAxis, Legend, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar, LabelList } from 'recharts';
 import { generateResultExplanation, generateVoteIntentionAnalysis, generateChatResponse } from './services/geminiService';
@@ -10,10 +13,20 @@ import { generateResultExplanation, generateVoteIntentionAnalysis, generateChatR
 type View = 'weights' | 'questionnaire' | 'results' | 'about';
 
 // --- LocalStorage Keys ---
-const LOCAL_STORAGE_KEYS = {
-  VIEW: 'votaInformado-view',
-  ANSWERS: 'votaInformado-answers',
-  WEIGHTS: 'votaInformado-weights',
+const politicalDataByCountry: Record<string, PoliticalData> = {
+  ES: esPoliticalData,
+  US: usPoliticalData,
+};
+
+let politicalData: PoliticalData = politicalDataByCountry[activeCountryCode] ?? esPoliticalData;
+
+const getLocalStorageKeys = (countryCode: string, locale: string) => {
+    const storagePrefix = `votaInformado-${countryCode}-${locale}`;
+    return {
+        VIEW: `${storagePrefix}-view`,
+        ANSWERS: `${storagePrefix}-answers`,
+        WEIGHTS: `${storagePrefix}-weights`,
+    };
 };
 
 // --- Helper Components defined outside App to prevent re-renders ---
@@ -44,14 +57,51 @@ const getReliabilityInfo = (answeredQuestions: number, totalQuestions: number) =
     return { label: 'Incompleto', colorClass: 'text-gray-700', bgClass: 'bg-gray-100', detail: 'Responde al menos 2 preguntas por tema para ver resultados.' };
 };
 
-const Header: React.FC<{ onInfoClick: () => void }> = ({ onInfoClick }) => (
+const Header: React.FC<{
+    onInfoClick: () => void;
+    selectedCountryCode: string;
+    selectedLocale: string;
+    onCountryChange: (countryCode: string) => void;
+    onLocaleChange: (locale: string) => void;
+}> = ({ onInfoClick, selectedCountryCode, selectedLocale, onCountryChange, onLocaleChange }) => {
+    const selectedCountry = countryRegistry.find(country => country.code === selectedCountryCode) ?? countryRegistry[0];
+
+    return (
     <header className="bg-white shadow-md">
         <div className="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8 relative">
             <h1 className="text-4xl font-extrabold text-gray-900 tracking-tight flex items-center justify-center gap-3">
                 <SparklesIcon className="w-10 h-10 text-indigo-600" />
                 Vota Informado
             </h1>
-            <p className="mt-2 text-center text-lg text-gray-600">Descubre tu afinidad política en España</p>
+            <p className="mt-2 text-center text-lg text-gray-600">Descubre tu afinidad política en {politicalData.country?.name ?? 'tu país'}</p>
+            <div className="mt-4 flex justify-center">
+                <label className="sr-only" htmlFor="country-selector">País</label>
+                <select
+                    id="country-selector"
+                    value={selectedCountryCode}
+                    onChange={(event) => onCountryChange(event.target.value)}
+                    className="text-sm rounded-full border border-indigo-100 bg-indigo-50 text-indigo-700 px-3 py-1 font-semibold"
+                    title="Seleccionar país"
+                >
+                    {countryRegistry.map(country => (
+                        <option key={country.code} value={country.code}>
+                            {country.displayName[selectedLocale] ?? country.displayName[activeLocale] ?? country.name}
+                        </option>
+                    ))}
+                </select>
+                <label className="sr-only" htmlFor="locale-selector">Idioma</label>
+                <select
+                    id="locale-selector"
+                    value={selectedLocale}
+                    onChange={(event) => onLocaleChange(event.target.value)}
+                    className="ml-2 text-sm rounded-full border border-slate-200 bg-white text-slate-700 px-3 py-1 font-semibold"
+                    title="Seleccionar idioma"
+                >
+                    {selectedCountry.supportedLocales.map(locale => (
+                        <option key={locale} value={locale}>{locale}</option>
+                    ))}
+                </select>
+            </div>
             <button
                 onClick={onInfoClick}
                 className="absolute top-1/2 right-4 sm:right-6 lg:right-8 -translate-y-1/2 text-gray-400 hover:text-indigo-600 transition-colors"
@@ -61,7 +111,8 @@ const Header: React.FC<{ onInfoClick: () => void }> = ({ onInfoClick }) => (
             </button>
         </div>
     </header>
-);
+    );
+};
 
 const TopicWeightsComponent: React.FC<{
     userWeights: UserWeights;
@@ -536,6 +587,10 @@ const ResultsComponent: React.FC<{
     const [intentionAnalysis, setIntentionAnalysis] = useState('');
     const [isLoading, setIsLoading] = useState(false);
     const [modalContent, setModalContent] = useState<{ title: string; content: React.ReactNode } | null>(null);
+    const topParty = affinityResults[0]?.party;
+    const topPartyInternationalSimilarities = topParty
+        ? internationalSimilarities.ES[topParty as keyof typeof internationalSimilarities.ES] ?? []
+        : [];
 
     const handleOpenModal = (title: string, content: React.ReactNode) => {
         setModalContent({ title, content });
@@ -804,6 +859,25 @@ const ResultsComponent: React.FC<{
                                         <button onClick={() => handleOpenModal(infoContent.affinity.title, infoContent.affinity.content)} className="text-gray-400 hover:text-indigo-600"><InfoIcon className="w-6 h-6"/></button>
                                     </div>
                                     <AffinityRankingList affinityResults={affinityResults} />
+                                    {topPartyInternationalSimilarities.length > 0 && (
+                                        <div className="mt-8 rounded-xl border border-indigo-100 bg-indigo-50 p-5">
+                                            <h3 className="text-lg font-bold text-indigo-900">Similitudes internacionales · experimental</h3>
+                                            <p className="mt-1 text-sm text-indigo-800">
+                                                Como tu mayor afinidad ahora mismo es con <strong>{topParty}</strong>, estas serían referencias aproximadas para Estados Unidos. No son equivalencias 1:1.
+                                            </p>
+                                            <div className="mt-4 grid gap-3 md:grid-cols-2">
+                                                {topPartyInternationalSimilarities.map(match => (
+                                                    <div key={`${match.countryCode}-${match.party}`} className="rounded-lg bg-white p-4 shadow-sm border border-indigo-100">
+                                                        <div className="flex items-center justify-between gap-3">
+                                                            <p className="font-semibold text-gray-900">{match.party}</p>
+                                                            <span className="rounded-full bg-indigo-100 px-2 py-1 text-xs font-bold text-indigo-700">{match.score}%</span>
+                                                        </div>
+                                                        <p className="mt-2 text-sm text-gray-600">{match.rationale}</p>
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        </div>
+                                    )}
                                 </div>
                             )}
                             {principalSubTab === 'brújula' && (
@@ -1085,90 +1159,122 @@ const AboutComponent: React.FC<{ onBack: () => void; onClearStorage: () => void;
 
 
 const App: React.FC = () => {
-    const [view, setView] = useState<View>(() => {
+    const [selectedCountryCode, setSelectedCountryCode] = useState<string>(() => localStorage.getItem('votaInformado-country') || activeCountryCode);
+    const initialCountry = countryRegistry.find(country => country.code === selectedCountryCode) ?? countryRegistry[0];
+    const [selectedLocale, setSelectedLocale] = useState<string>(() => localStorage.getItem('votaInformado-locale') || initialCountry.defaultLocale || activeLocale);
+
+    const currentPoliticalData = politicalDataByCountry[selectedCountryCode] ?? esPoliticalData;
+    politicalData = currentPoliticalData;
+
+    const storageKeys = useMemo(() => getLocalStorageKeys(selectedCountryCode, selectedLocale), [selectedCountryCode, selectedLocale]);
+
+    const createInitialAnswers = (data: PoliticalData): UserAnswers => {
+        const initialAnswers: UserAnswers = {};
+        data.topics.flatMap(t => t.questions).forEach(q => { initialAnswers[q.id] = undefined; });
+        return initialAnswers;
+    };
+
+    const createInitialWeights = (data: PoliticalData): UserWeights =>
+        data.topics.reduce((acc, topic) => ({ ...acc, [topic.id]: 2 }), {} as UserWeights);
+
+    const loadSavedView = (keys: ReturnType<typeof getLocalStorageKeys>): View => {
         try {
-            const savedAnswersRaw = localStorage.getItem(LOCAL_STORAGE_KEYS.ANSWERS);
+            const savedAnswersRaw = localStorage.getItem(keys.ANSWERS);
             if (savedAnswersRaw) {
                 const savedAnswers = JSON.parse(savedAnswersRaw);
-                // If there are answers, respect the saved view or default to questionnaire
                 if (Object.values(savedAnswers).some(a => a !== undefined)) {
-                    const savedView = localStorage.getItem(LOCAL_STORAGE_KEYS.VIEW) as View | null;
-                    // Prevent going to 'about' on reload, default to results if they exist
-                    if (savedView && savedView !== 'about') {
-                        return savedView;
-                    }
-                    return 'results'; 
+                    const savedView = localStorage.getItem(keys.VIEW) as View | null;
+                    if (savedView && savedView !== 'about') return savedView;
+                    return 'results';
                 }
             }
         } catch (e) {
             console.error("Error reading from localStorage", e);
-            return 'weights';
         }
         return 'weights';
-    });
+    };
 
-    const [userAnswers, setUserAnswers] = useState<UserAnswers>(() => {
+    const loadSavedAnswers = (keys: ReturnType<typeof getLocalStorageKeys>, data: PoliticalData): UserAnswers => {
         try {
-            const savedAnswers = localStorage.getItem(LOCAL_STORAGE_KEYS.ANSWERS);
+            const savedAnswers = localStorage.getItem(keys.ANSWERS);
             if (savedAnswers) {
                 const parsedAnswers = JSON.parse(savedAnswers);
-                if (Object.keys(parsedAnswers).length > 0) {
-                     return parsedAnswers;
-                }
+                if (Object.keys(parsedAnswers).length > 0) return parsedAnswers;
             }
         } catch (error) {
             console.error("Error parsing saved answers from localStorage", error);
-            localStorage.removeItem(LOCAL_STORAGE_KEYS.ANSWERS);
+            localStorage.removeItem(keys.ANSWERS);
         }
-        const initialAnswers: UserAnswers = {};
-        politicalData.topics.flatMap(t => t.questions).forEach(q => { initialAnswers[q.id] = undefined; });
-        return initialAnswers;
-    });
+        return createInitialAnswers(data);
+    };
 
-    const [userWeights, setUserWeights] = useState<UserWeights>(() => {
-         try {
-            const savedWeights = localStorage.getItem(LOCAL_STORAGE_KEYS.WEIGHTS);
+    const loadSavedWeights = (keys: ReturnType<typeof getLocalStorageKeys>, data: PoliticalData): UserWeights => {
+        try {
+            const savedWeights = localStorage.getItem(keys.WEIGHTS);
             if (savedWeights) {
                  const parsedWeights = JSON.parse(savedWeights);
-                 if (Object.keys(parsedWeights).length > 0) {
-                    return parsedWeights;
-                 }
+                 if (Object.keys(parsedWeights).length > 0) return parsedWeights;
             }
         } catch (error) {
             console.error("Error parsing saved weights from localStorage", error);
-            localStorage.removeItem(LOCAL_STORAGE_KEYS.WEIGHTS);
+            localStorage.removeItem(keys.WEIGHTS);
         }
-        return politicalData.topics.reduce((acc, topic) => ({ ...acc, [topic.id]: 2 }), {} as UserWeights)
-    });
+        return createInitialWeights(data);
+    };
+
+    const [view, setView] = useState<View>(() => loadSavedView(getLocalStorageKeys(selectedCountryCode, selectedLocale)));
+    const [userAnswers, setUserAnswers] = useState<UserAnswers>(() => loadSavedAnswers(getLocalStorageKeys(selectedCountryCode, selectedLocale), currentPoliticalData));
+    const [userWeights, setUserWeights] = useState<UserWeights>(() => loadSavedWeights(getLocalStorageKeys(selectedCountryCode, selectedLocale), currentPoliticalData));
+
+    const handleCountryChange = (countryCode: string) => {
+        const country = countryRegistry.find(item => item.code === countryCode) ?? countryRegistry[0];
+        const nextLocale = country.supportedLocales.includes(selectedLocale) ? selectedLocale : country.defaultLocale;
+        setSelectedCountryCode(country.code);
+        setSelectedLocale(nextLocale);
+        localStorage.setItem('votaInformado-country', country.code);
+        localStorage.setItem('votaInformado-locale', nextLocale);
+    };
+
+    const handleLocaleChange = (locale: string) => {
+        setSelectedLocale(locale);
+        localStorage.setItem('votaInformado-locale', locale);
+    };
+
+    useEffect(() => {
+        const nextData = politicalDataByCountry[selectedCountryCode] ?? esPoliticalData;
+        const nextKeys = getLocalStorageKeys(selectedCountryCode, selectedLocale);
+        politicalData = nextData;
+        setUserAnswers(loadSavedAnswers(nextKeys, nextData));
+        setUserWeights(loadSavedWeights(nextKeys, nextData));
+        setView(loadSavedView(nextKeys));
+    }, [selectedCountryCode, selectedLocale]);
 
     // --- LocalStorage Persistence ---
     useEffect(() => {
         try {
-             if (view !== 'about') {
-                localStorage.setItem(LOCAL_STORAGE_KEYS.VIEW, view);
-            }
+             if (view !== 'about') localStorage.setItem(storageKeys.VIEW, view);
         } catch (error) {
             console.error("Failed to save view to localStorage", error);
         }
-    }, [view]);
+    }, [view, storageKeys]);
 
     useEffect(() => {
         try {
-            localStorage.setItem(LOCAL_STORAGE_KEYS.ANSWERS, JSON.stringify(userAnswers));
+            localStorage.setItem(storageKeys.ANSWERS, JSON.stringify(userAnswers));
         } catch (error) {
             console.error("Failed to save answers to localStorage", error);
         }
-    }, [userAnswers]);
+    }, [userAnswers, storageKeys]);
 
     useEffect(() => {
         try {
-            localStorage.setItem(LOCAL_STORAGE_KEYS.WEIGHTS, JSON.stringify(userWeights));
+            localStorage.setItem(storageKeys.WEIGHTS, JSON.stringify(userWeights));
         } catch (error) {
             console.error("Failed to save weights to localStorage", error);
         }
-    }, [userWeights]);
+    }, [userWeights, storageKeys]);
 
-    const totalQuestions = useMemo(() => politicalData.topics.flatMap(t => t.questions).length, []);
+    const totalQuestions = useMemo(() => politicalData.topics.flatMap(t => t.questions).length, [selectedCountryCode]);
     const answeredQuestions = useMemo(() => Object.values(userAnswers).filter(a => a !== undefined).length, [userAnswers]);
     
     const handleAnswerChange = (questionId: string, value: Stance | null) => {
@@ -1190,12 +1296,14 @@ const App: React.FC = () => {
     };
 
     const handleClearStorage = () => {
-        if (window.confirm("¿Estás seguro de que quieres borrar todo tu progreso? Esta acción es irreversible.")) {
+        if (window.confirm("¿Estás seguro de que quieres borrar todo tu progreso para este país e idioma? Esta acción es irreversible.")) {
             try {
-                localStorage.removeItem(LOCAL_STORAGE_KEYS.VIEW);
-                localStorage.removeItem(LOCAL_STORAGE_KEYS.ANSWERS);
-                localStorage.removeItem(LOCAL_STORAGE_KEYS.WEIGHTS);
-                window.location.reload();
+                localStorage.removeItem(storageKeys.VIEW);
+                localStorage.removeItem(storageKeys.ANSWERS);
+                localStorage.removeItem(storageKeys.WEIGHTS);
+                setUserAnswers(createInitialAnswers(politicalData));
+                setUserWeights(createInitialWeights(politicalData));
+                setView('weights');
             } catch (error) {
                 console.error("Failed to clear localStorage", error);
                 alert("Hubo un error al intentar limpiar la memoria.");
@@ -1212,9 +1320,7 @@ const App: React.FC = () => {
                 if (userAnswer === null || userAnswer === undefined) return;
                 question.partyStances.forEach(partyStance => {
                     const party = partyStance.party;
-                    if (!affinityScores[party]![topic.id]) {
-                        affinityScores[party]![topic.id] = { score: 0, count: 0 };
-                    }
+                    if (!affinityScores[party]![topic.id]) affinityScores[party]![topic.id] = { score: 0, count: 0 };
                     const distance = Math.abs(userAnswer - partyStance.stance);
                     affinityScores[party]![topic.id].score += (4 - distance) / 4;
                     affinityScores[party]![topic.id].count += 1;
@@ -1238,7 +1344,7 @@ const App: React.FC = () => {
         });
 
         return finalResults.sort((a, b) => b.score - a.score);
-    }, [userAnswers, userWeights]);
+    }, [userAnswers, userWeights, selectedCountryCode]);
 
     const renderView = () => {
         switch (view) {
@@ -1259,7 +1365,7 @@ const App: React.FC = () => {
             case 'about':
                 return <AboutComponent 
                             onBack={() => {
-                                 const savedView = localStorage.getItem(LOCAL_STORAGE_KEYS.VIEW) as View | null;
+                                 const savedView = localStorage.getItem(storageKeys.VIEW) as View | null;
                                  setView(savedView || 'weights');
                             }} 
                             onClearStorage={() => handleClearStorage()} 
@@ -1271,12 +1377,17 @@ const App: React.FC = () => {
     
     return (
         <div className="min-h-screen bg-gray-100 pb-12">
-            <Header onInfoClick={() => setView('about')} />
+            <Header
+                onInfoClick={() => setView('about')}
+                selectedCountryCode={selectedCountryCode}
+                selectedLocale={selectedLocale}
+                onCountryChange={handleCountryChange}
+                onLocaleChange={handleLocaleChange}
+            />
             <main>
                 {renderView()}
             </main>
         </div>
     );
 };
-
 export default App;
