@@ -1,10 +1,12 @@
 # Vota Informado: Analizador de Afinidad Política
 
-**Vota Informado** es una aplicación web interactiva diseñada para ayudar a los ciudadanos en España a descubrir su afinidad con los diferentes partidos políticos. A través de un cuestionario detallado, la herramienta calcula un porcentaje de coincidencia y ofrece análisis profundos para que los usuarios puedan tomar decisiones de voto más informadas.
+**Vota Informado** es una aplicación web interactiva para entender panoramas políticos y descubrir afinidad con partidos y familias políticas. Incluye España, Estados Unidos, Francia, Alemania, Reino Unido y elecciones europeas.
 
 ## ✨ Características Principales
 
 *   **Cuestionario Ponderado:** El usuario no solo responde a preguntas, sino que también indica qué temas le importan más, lo que pondera el resultado final.
+*   **Explorador político:** Permite consultar partidos, familias, ejes ideológicos y posiciones por tema sin completar el cuestionario.
+*   **Soporte multipaís:** Cada ámbito mantiene sus propias preguntas, partidos, respuestas y progreso local.
 *   **Resultados Detallados:** Muestra un ranking de afinidad con cada partido, expresado en porcentajes.
 *   **Brújula Ideológica:** Sitúa al usuario y a los partidos en un espectro de dos ejes (Económico y Social) para una comparación visual.
 *   **Gráfico Radar por Temas:** Permite comparar la afinidad con varios partidos en cada uno de los 10 temas del cuestionario.

@@ -30,6 +30,26 @@ export const countryRegistry: CountryRegistryItem[] = [
       'es-US': 'Estados Unidos',
     },
   },
+  {
+    code: 'FR', name: 'Francia', defaultLocale: 'es-ES', supportedLocales: ['es-ES'],
+    politicalSystem: 'República semipresidencialista.', status: 'active',
+    displayName: { 'es-ES': 'Francia', 'en-US': 'France' },
+  },
+  {
+    code: 'DE', name: 'Alemania', defaultLocale: 'es-ES', supportedLocales: ['es-ES'],
+    politicalSystem: 'República federal parlamentaria.', status: 'active',
+    displayName: { 'es-ES': 'Alemania', 'en-US': 'Germany' },
+  },
+  {
+    code: 'GB', name: 'Reino Unido', defaultLocale: 'es-ES', supportedLocales: ['es-ES'],
+    politicalSystem: 'Monarquía parlamentaria.', status: 'active',
+    displayName: { 'es-ES': 'Reino Unido', 'en-US': 'United Kingdom' },
+  },
+  {
+    code: 'EU', name: 'Elecciones europeas', defaultLocale: 'es-ES', supportedLocales: ['es-ES'],
+    politicalSystem: 'Elecciones al Parlamento Europeo.', status: 'active',
+    displayName: { 'es-ES': 'Elecciones europeas', 'en-US': 'European elections' },
+  },
 ];
 
 export const activeCountryCode = 'ES';

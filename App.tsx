@@ -3,6 +3,7 @@ import React, { useState, useMemo, useRef, useEffect } from 'react';
 import { UserAnswers, UserWeights, Stance, AffinityResult, Party, Question, QuestionPriority, CompassPoint, Point, PoliticalData, ChatMessage } from './types';
 import esPoliticalData from './data/politicalData';
 import usPoliticalData from './data/usPoliticalData';
+import { euPoliticalData, francePoliticalData, germanyPoliticalData, ukPoliticalData } from './data/internationalPoliticalData';
 import { activeCountryCode, activeLocale, countryRegistry } from './data/countryRegistry';
 import { internationalSimilarities } from './data/internationalSimilarities';
 import { SparklesIcon, ArrowLeftIcon, ArrowRightIcon, ChevronDownIcon, TrophyIcon, InfoIcon, PaperAirplaneIcon } from './components/IconComponents';
@@ -10,12 +11,16 @@ import { XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell, Scatte
 import { generateResultExplanation, generateVoteIntentionAnalysis, generateChatResponse } from './services/geminiService';
 
 // --- Helper Types ---
-type View = 'weights' | 'questionnaire' | 'results' | 'about';
+type View = 'home' | 'explore' | 'weights' | 'questionnaire' | 'results' | 'about';
 
 // --- LocalStorage Keys ---
 const politicalDataByCountry: Record<string, PoliticalData> = {
   ES: esPoliticalData,
   US: usPoliticalData,
+  FR: francePoliticalData,
+  DE: germanyPoliticalData,
+  GB: ukPoliticalData,
+  EU: euPoliticalData,
 };
 
 let politicalData: PoliticalData = politicalDataByCountry[activeCountryCode] ?? esPoliticalData;
@@ -101,20 +106,21 @@ const getReliabilityInfo = (answeredQuestions: number, totalQuestions: number) =
 
 const Header: React.FC<{
     onInfoClick: () => void;
+    onHomeClick: () => void;
     selectedCountryCode: string;
     selectedLocale: string;
     onCountryChange: (countryCode: string) => void;
     onLocaleChange: (locale: string) => void;
-}> = ({ onInfoClick, selectedCountryCode, selectedLocale, onCountryChange, onLocaleChange }) => {
+}> = ({ onInfoClick, onHomeClick, selectedCountryCode, selectedLocale, onCountryChange, onLocaleChange }) => {
     const selectedCountry = countryRegistry.find(country => country.code === selectedCountryCode) ?? countryRegistry[0];
 
     return (
     <header className="bg-white shadow-md">
         <div className="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8 relative">
-            <h1 className="text-4xl font-extrabold text-gray-900 tracking-tight flex items-center justify-center gap-3">
+            <button onClick={onHomeClick} className="mx-auto text-4xl font-extrabold text-gray-900 tracking-tight flex items-center justify-center gap-3 hover:text-indigo-700 transition-colors">
                 <SparklesIcon className="w-10 h-10 text-indigo-600" />
                 Vota Informado
-            </h1>
+            </button>
             <p className="mt-2 text-center text-lg text-gray-600">{t('subtitle')} {politicalData.country?.name ?? 'tu país'}</p>
             <div className="mt-4 flex justify-center">
                 <label className="sr-only" htmlFor="country-selector">{t('country')}</label>
@@ -745,7 +751,7 @@ const ResultsComponent: React.FC<{
     };
     
     const compassData = useMemo<CompassPoint[]>(() => {
-        const partyCoordinates: { [key in Party]?: Point } = {
+        const legacyPartyCoordinates: { [key in Party]?: Point } = {
             [Party.PP]: { x: 5, y: -4 }, [Party.PSOE]: { x: -5, y: 7 }, [Party.VOX]: { x: 7, y: -9 },
             [Party.SUMAR]: { x: -8, y: 9 }, [Party.PODEMOS]: { x: -9, y: 8 }, [Party.ERC]: { x: -6, y: 8 },
             [Party.JUNTS]: { x: 3, y: 0 }, [Party.EH_BILDU]: { x: -7, y: 8 }, [Party.PNV]: { x: 1, y: 2 },
@@ -771,9 +777,14 @@ const ResultsComponent: React.FC<{
         const userEconScore = calculateUserScore('economic');
         const userSocialScore = calculateUserScore('social');
         const userPoint: CompassPoint = { name: 'Tú', coords: { x: userEconScore, y: userSocialScore }, color: '#EF4444', size: 250 };
-        const partyPoints: CompassPoint[] = politicalData.parties.filter(p => partyCoordinates[p.name]).map(p => ({ name: p.name, coords: partyCoordinates[p.name]!, color: p.color, size: 100 }));
+        const partyPoints: CompassPoint[] = politicalData.parties.flatMap(party => {
+            const coords = party.ideologyVector?.economic !== undefined && party.ideologyVector?.social !== undefined
+                ? { x: party.ideologyVector.economic, y: party.ideologyVector.social }
+                : legacyPartyCoordinates[party.name];
+            return coords ? [{ name: party.name, coords, color: party.color, size: 100 }] : [];
+        });
         return [userPoint, ...partyPoints];
-    }, [userAnswers]);
+    }, [userAnswers, politicalData.country?.code]);
 
     const radarChartData = useMemo(() => {
         return politicalData.topics.map(topic => {
@@ -985,8 +996,8 @@ const ResultsComponent: React.FC<{
                                     const meta = getQuestionPriorityMeta(priority);
                                     return (
                                         <div key={priority} className="bg-white border rounded-lg p-4 shadow-sm">
-                                            <span className={`inline-flex rounded-full border px-2 py-0.5 text-xs font-bold uppercase tracking-wide ${meta.className}`}>{meta.label}</span>
-                                            <p className="text-sm text-gray-700 mt-3">{meta.description}</p>
+                                            <span className={`inline-flex rounded-full border px-2 py-0.5 text-xs font-bold uppercase tracking-wide ${meta.className}`}>{t(meta.labelKey)}</span>
+                                            <p className="text-sm text-gray-700 mt-3">{t(meta.descriptionKey)}</p>
                                         </div>
                                     );
                                 })}
@@ -1127,6 +1138,90 @@ const ResultsComponent: React.FC<{
                         </div>
                     )}
                 </div>
+            </div>
+        </div>
+    );
+};
+
+const HomeComponent: React.FC<{ onStart: () => void; onExplore: () => void }> = ({ onStart, onExplore }) => (
+    <div className="max-w-6xl mx-auto px-4 py-10">
+        <section className="rounded-3xl bg-gradient-to-br from-indigo-700 via-indigo-600 to-violet-600 text-white p-8 sm:p-12 shadow-xl">
+            <p className="uppercase tracking-[0.2em] text-indigo-200 text-sm font-bold">Entiende antes de elegir</p>
+            <h2 className="mt-3 text-4xl sm:text-5xl font-black max-w-3xl">Compara tus ideas o explora el panorama político</h2>
+            <p className="mt-5 text-lg text-indigo-100 max-w-3xl">
+                Consulta partidos, familias ideológicas y posiciones clave de {politicalData.country?.name}. Cuando quieras, responde el cuestionario para calcular tu afinidad.
+            </p>
+            <div className="mt-8 flex flex-wrap gap-3">
+                <button onClick={onStart} className="bg-white text-indigo-700 font-bold py-3 px-6 rounded-xl hover:bg-indigo-50 shadow-md">
+                    Empezar cuestionario
+                </button>
+                <button onClick={onExplore} className="bg-indigo-900/40 border border-indigo-300 text-white font-bold py-3 px-6 rounded-xl hover:bg-indigo-900/60">
+                    Explorar partidos
+                </button>
+            </div>
+        </section>
+        <div className="grid md:grid-cols-3 gap-5 mt-8">
+            <div className="bg-white rounded-2xl p-6 shadow-sm border"><div className="text-3xl font-black text-indigo-600">{politicalData.parties.length}</div><h3 className="font-bold text-gray-900 mt-2">Partidos y familias</h3><p className="text-gray-600 mt-1">Una guía rápida para situar a los principales actores.</p></div>
+            <div className="bg-white rounded-2xl p-6 shadow-sm border"><div className="text-3xl font-black text-indigo-600">{politicalData.topics.length}</div><h3 className="font-bold text-gray-900 mt-2">Grandes temas</h3><p className="text-gray-600 mt-1">Economía, sociedad, migración, clima y política internacional.</p></div>
+            <div className="bg-white rounded-2xl p-6 shadow-sm border"><div className="text-3xl font-black text-indigo-600">{politicalData.topics.flatMap(topic => topic.questions).length}</div><h3 className="font-bold text-gray-900 mt-2">Preguntas comparables</h3><p className="text-gray-600 mt-1">Cada respuesta se contrasta con posiciones justificadas.</p></div>
+        </div>
+    </div>
+);
+
+const PartyExplorerComponent: React.FC<{ onStart: () => void }> = ({ onStart }) => {
+    const [selectedParty, setSelectedParty] = useState<Party>(politicalData.parties[0]?.name ?? '');
+    const party = politicalData.parties.find(item => item.name === selectedParty) ?? politicalData.parties[0];
+
+    useEffect(() => {
+        setSelectedParty(politicalData.parties[0]?.name ?? '');
+    }, [politicalData.country?.code]);
+
+    if (!party) return null;
+    const vector = party.ideologyVector ?? {};
+    const axisCards = politicalData.ideologyAxes?.filter(axis => vector[axis.id] !== undefined) ?? [];
+
+    return (
+        <div className="max-w-7xl mx-auto px-4 py-8">
+            <div className="flex flex-wrap items-end justify-between gap-4 mb-7">
+                <div>
+                    <p className="text-sm font-bold uppercase tracking-wider text-indigo-600">Guía política</p>
+                    <h2 className="text-3xl font-black text-gray-900">Panorama de {politicalData.country?.name}</h2>
+                    <p className="text-gray-600 mt-2 max-w-3xl">{politicalData.country?.politicalSystem}</p>
+                </div>
+                <button onClick={onStart} className="bg-indigo-600 text-white font-bold py-3 px-5 rounded-xl hover:bg-indigo-700">Hacer el cuestionario</button>
+            </div>
+            <div className="grid lg:grid-cols-[280px_1fr] gap-6">
+                <aside className="bg-white rounded-2xl border shadow-sm p-3 h-fit">
+                    {politicalData.parties.map(item => (
+                        <button key={item.name} onClick={() => setSelectedParty(item.name)} className={`w-full text-left p-3 rounded-xl mb-1 transition-colors ${party.name === item.name ? 'bg-indigo-50' : 'hover:bg-gray-50'}`}>
+                            <span className="inline-block w-3 h-3 rounded-full mr-2" style={{ backgroundColor: item.color }} />
+                            <span className="font-bold text-gray-800">{item.name}</span>
+                            <span className="block text-xs text-gray-500 ml-5 mt-1">{item.family}</span>
+                        </button>
+                    ))}
+                </aside>
+                <section className="space-y-6">
+                    <div className="bg-white rounded-2xl border shadow-sm p-6">
+                        <div className="flex items-center gap-3"><span className="w-5 h-5 rounded-full" style={{ backgroundColor: party.color }} /><h3 className="text-3xl font-black" style={{ color: party.color }}>{party.name}</h3></div>
+                        <p className="text-lg text-gray-600 mt-2">{party.family}</p>
+                        <div className="grid sm:grid-cols-2 xl:grid-cols-3 gap-3 mt-6">
+                            {axisCards.map(axis => {
+                                const value = vector[axis.id] ?? 0;
+                                return <div key={axis.id} className="rounded-xl bg-gray-50 border p-3">
+                                    <div className="flex justify-between text-sm font-bold text-gray-700"><span>{axis.label}</span><span>{value > 0 ? `+${value}` : value}</span></div>
+                                    <div className="h-2 rounded-full bg-gray-200 mt-3 overflow-hidden"><div className="h-full rounded-full" style={{ width: `${Math.abs(value) * 10}%`, marginLeft: value >= 0 ? '50%' : `${50 - Math.abs(value) * 5}%`, backgroundColor: party.color }} /></div>
+                                    <p className="text-xs text-gray-500 mt-2">{value >= 0 ? axis.rightLabel : axis.leftLabel}</p>
+                                </div>;
+                            })}
+                        </div>
+                    </div>
+                    <div className="grid md:grid-cols-2 gap-4">
+                        {politicalData.topics.map(topic => {
+                            const summary = topic.partyTopicSummaries?.find(item => item.party === party.name);
+                            return <article key={topic.id} className="bg-white rounded-2xl border shadow-sm p-5"><h4 className="font-black text-gray-900 flex gap-2 items-center"><span className="text-indigo-600">{topic.icon}</span>{topic.title}</h4><p className="text-gray-600 mt-3">{summary?.summary ?? topic.description}</p></article>;
+                        })}
+                    </div>
+                </section>
             </div>
         </div>
     );
@@ -1273,7 +1368,7 @@ const App: React.FC = () => {
         } catch (e) {
             console.error("Error reading from localStorage", e);
         }
-        return 'weights';
+        return 'home';
     };
 
     const loadSavedAnswers = (keys: ReturnType<typeof getLocalStorageKeys>, data: PoliticalData): UserAnswers => {
@@ -1487,6 +1582,10 @@ const App: React.FC = () => {
 
     const renderView = () => {
         switch (view) {
+            case 'home':
+                return <HomeComponent onStart={() => setView('weights')} onExplore={() => setView('explore')} />;
+            case 'explore':
+                return <PartyExplorerComponent onStart={() => setView('weights')} />;
             case 'weights':
                 return <TopicWeightsComponent userWeights={userWeights} onWeightChange={handleWeightChange} onNext={() => setView('questionnaire')} />;
             case 'questionnaire':
@@ -1512,7 +1611,7 @@ const App: React.FC = () => {
                             onImportData={handleImportData}
                         />;
             default:
-                return <TopicWeightsComponent userWeights={userWeights} onWeightChange={handleWeightChange} onNext={() => setView('questionnaire')} />;
+                return <HomeComponent onStart={() => setView('weights')} onExplore={() => setView('explore')} />;
         }
     };
     
@@ -1520,6 +1619,7 @@ const App: React.FC = () => {
         <div className="min-h-screen bg-gray-100 pb-12">
             <Header
                 onInfoClick={() => setView('about')}
+                onHomeClick={() => setView('home')}
                 selectedCountryCode={selectedCountryCode}
                 selectedLocale={selectedLocale}
                 onCountryChange={handleCountryChange}

@@ -358,7 +358,7 @@ const usPoliticalData: PoliticalData = {
         { party: US_PARTIES.LIBERTARIAN, summary: 'Civil liberties, gun rights and skepticism of federal mandates.' },
         { party: US_PARTIES.GREEN, summary: 'Voting access, democratic reform and stronger public-safety regulation.' },
       ],
-    },,
+    },
     {
       id: 'housing-cost-of-living',
       title: 'Housing and Cost of Living',
