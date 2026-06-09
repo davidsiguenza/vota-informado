@@ -31,19 +31,19 @@ export const countryRegistry: CountryRegistryItem[] = [
     },
   },
   {
-    code: 'FR', name: 'Francia', defaultLocale: 'es-ES', supportedLocales: ['es-ES'],
+    code: 'FR', name: 'Francia', defaultLocale: 'fr-FR', supportedLocales: ['fr-FR', 'en-US', 'es-ES'],
     politicalSystem: 'República semipresidencialista.', status: 'active',
-    displayName: { 'es-ES': 'Francia', 'en-US': 'France' },
+    displayName: { 'es-ES': 'Francia', 'en-US': 'France', 'fr-FR': 'France' },
   },
   {
-    code: 'DE', name: 'Alemania', defaultLocale: 'es-ES', supportedLocales: ['es-ES'],
+    code: 'DE', name: 'Alemania', defaultLocale: 'de-DE', supportedLocales: ['de-DE', 'en-US', 'es-ES'],
     politicalSystem: 'República federal parlamentaria.', status: 'active',
-    displayName: { 'es-ES': 'Alemania', 'en-US': 'Germany' },
+    displayName: { 'es-ES': 'Alemania', 'en-US': 'Germany', 'de-DE': 'Deutschland' },
   },
   {
-    code: 'GB', name: 'Reino Unido', defaultLocale: 'es-ES', supportedLocales: ['es-ES'],
+    code: 'GB', name: 'Reino Unido', defaultLocale: 'en-GB', supportedLocales: ['en-GB', 'es-ES'],
     politicalSystem: 'Monarquía parlamentaria.', status: 'active',
-    displayName: { 'es-ES': 'Reino Unido', 'en-US': 'United Kingdom' },
+    displayName: { 'es-ES': 'Reino Unido', 'en-US': 'United Kingdom', 'en-GB': 'United Kingdom' },
   },
   {
     code: 'EU', name: 'Elecciones europeas', defaultLocale: 'es-ES', supportedLocales: ['es-ES'],

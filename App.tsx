@@ -3,7 +3,7 @@ import React, { useState, useMemo, useRef, useEffect } from 'react';
 import { UserAnswers, UserWeights, Stance, AffinityResult, Party, Question, QuestionPriority, CompassPoint, Point, PoliticalData, ChatMessage } from './types';
 import esPoliticalData from './data/politicalData';
 import usPoliticalData from './data/usPoliticalData';
-import { euPoliticalData, francePoliticalData, germanyPoliticalData, ukPoliticalData } from './data/internationalPoliticalData';
+import { euPoliticalData, francePoliticalData, germanyPoliticalData, localizeInternationalPoliticalData, ukPoliticalData } from './data/internationalPoliticalData';
 import { activeCountryCode, activeLocale, countryRegistry } from './data/countryRegistry';
 import { internationalSimilarities } from './data/internationalSimilarities';
 import { SparklesIcon, ArrowLeftIcon, ArrowRightIcon, ChevronDownIcon, TrophyIcon, InfoIcon, PaperAirplaneIcon } from './components/IconComponents';
@@ -57,9 +57,44 @@ const uiText = {
         yourAffinityResults: 'Your affinity results', internationalSimilarities: 'International similarities · experimental', notOneToOne: 'These are not 1:1 equivalences.',
         exportData: 'Export my data', importData: 'Import data', clearRestart: 'Clear memory and restart',
     },
+    fr: {
+        subtitle: 'Découvrez votre affinité politique en', country: 'Pays', language: 'Langue',
+        step1Title: 'Étape 1 : quels sujets comptent le plus pour vous ?', step1Desc: 'Ajustez l’importance de chaque sujet pour pondérer votre résultat final.',
+        lowImportance: 'Peu important', normalImportance: 'Normal', highImportance: 'Très important', goQuestionnaire: 'Accéder au questionnaire',
+        step2Title: 'Étape 2 : le questionnaire', randomFill: 'Réponses aléatoires (test)', importantInstruction: 'Instruction importante',
+        quickModeHelp: 'Pour obtenir un premier résultat, répondez aux 2 questions prioritaires de chaque thème. Continuez ensuite pour améliorer la fiabilité.',
+        answered: 'répondues', quickReady: '✓ Mode rapide prêt', of: 'sur',
+        priority1: 'Prioritaire', priority2: 'Recommandée', priority3: 'Approfondissement',
+        priority1Desc: 'Incluse dans le mode rapide car elle est très discriminante ou actuelle.', priority2Desc: 'Améliore la précision du résultat.', priority3Desc: 'Question plus spécifique pour affiner le profil.',
+        stronglyDisagree: 'Pas du tout d’accord', disagree: 'Pas d’accord', neutral: 'Neutre', agree: 'D’accord', stronglyAgree: 'Tout à fait d’accord', unknown: 'Ne sait pas / Sans réponse', viewPartyStances: 'Voir les positions des partis',
+        mainPanel: 'Tableau principal', adjustments: 'Réglages et réponses', methodology: 'Méthodologie et sources', partyPositions: 'Positions des partis', aiAnalysis: 'Analyse IA',
+        affinityResults: 'Résultats d’affinité', compass: 'Boussole idéologique', radar: 'Affinité par thème', myAnswers: 'Mes réponses', topicWeights: 'Pondération des thèmes',
+        yourAffinityResults: 'Vos résultats d’affinité', internationalSimilarities: 'Similarités internationales · expérimental', notOneToOne: 'Il ne s’agit pas d’équivalences exactes.',
+        exportData: 'Exporter mes données', importData: 'Importer des données', clearRestart: 'Effacer la mémoire et recommencer',
+    },
+    de: {
+        subtitle: 'Entdecke deine politische Übereinstimmung in', country: 'Land', language: 'Sprache',
+        step1Title: 'Schritt 1: Welche Themen sind dir wichtig?', step1Desc: 'Passe die Bedeutung jedes Themas an, um dein Endergebnis zu gewichten.',
+        lowImportance: 'Weniger wichtig', normalImportance: 'Normal', highImportance: 'Sehr wichtig', goQuestionnaire: 'Zum Fragebogen',
+        step2Title: 'Schritt 2: Der Fragebogen', randomFill: 'Zufällig ausfüllen (Test)', importantInstruction: 'Wichtiger Hinweis',
+        quickModeHelp: 'Beantworte für ein erstes Ergebnis die 2 priorisierten Fragen jedes Themas. Weitere Antworten erhöhen die Zuverlässigkeit.',
+        answered: 'beantwortet', quickReady: '✓ Schnellmodus bereit', of: 'von',
+        priority1: 'Priorität', priority2: 'Empfohlen', priority3: 'Vertiefung',
+        priority1Desc: 'Im Schnellmodus enthalten, da die Frage stark unterscheidet oder besonders aktuell ist.', priority2Desc: 'Erhöht die Genauigkeit des Ergebnisses.', priority3Desc: 'Spezifischere Frage zur Verfeinerung des Profils.',
+        stronglyDisagree: 'Stimme überhaupt nicht zu', disagree: 'Stimme nicht zu', neutral: 'Neutral', agree: 'Stimme zu', stronglyAgree: 'Stimme voll zu', unknown: 'Weiß nicht / Keine Antwort', viewPartyStances: 'Parteipositionen anzeigen',
+        mainPanel: 'Übersicht', adjustments: 'Einstellungen und Antworten', methodology: 'Methodik und Quellen', partyPositions: 'Parteipositionen', aiAnalysis: 'KI-Analyse',
+        affinityResults: 'Übereinstimmung', compass: 'Ideologischer Kompass', radar: 'Übereinstimmung nach Thema', myAnswers: 'Meine Antworten', topicWeights: 'Themengewichtung',
+        yourAffinityResults: 'Deine Übereinstimmung', internationalSimilarities: 'Internationale Ähnlichkeiten · experimentell', notOneToOne: 'Dies sind keine exakten Entsprechungen.',
+        exportData: 'Daten exportieren', importData: 'Daten importieren', clearRestart: 'Speicher löschen und neu starten',
+    },
 } as const;
 
-const t = (key: keyof typeof uiText.es) => (currentLocale.startsWith('en') ? uiText.en[key] : uiText.es[key]);
+const t = (key: keyof typeof uiText.es) => {
+    if (currentLocale.startsWith('fr')) return uiText.fr[key];
+    if (currentLocale.startsWith('de')) return uiText.de[key];
+    if (currentLocale.startsWith('en')) return uiText.en[key];
+    return uiText.es[key];
+};
 
 const getLocalStorageKeys = (countryCode: string, locale: string) => {
     const storagePrefix = `votaInformado-${countryCode}-${locale}`;
@@ -146,7 +181,7 @@ const Header: React.FC<{
                     title="Seleccionar idioma"
                 >
                     {selectedCountry.supportedLocales.map(locale => (
-                        <option key={locale} value={locale}>{locale}</option>
+                        <option key={locale} value={locale}>{new Intl.DisplayNames([selectedLocale], { type: 'language' }).of(locale.split('-')[0]) ?? locale}</option>
                     ))}
                 </select>
             </div>
@@ -1337,7 +1372,10 @@ const App: React.FC = () => {
     const initialCountry = countryRegistry.find(country => country.code === selectedCountryCode) ?? countryRegistry[0];
     const [selectedLocale, setSelectedLocale] = useState<string>(() => localStorage.getItem('votaInformado-locale') || initialCountry.defaultLocale || activeLocale);
 
-    const currentPoliticalData = politicalDataByCountry[selectedCountryCode] ?? esPoliticalData;
+    const basePoliticalData = politicalDataByCountry[selectedCountryCode] ?? esPoliticalData;
+    const currentPoliticalData = ['FR', 'DE', 'GB', 'EU'].includes(selectedCountryCode)
+        ? localizeInternationalPoliticalData(basePoliticalData, selectedLocale)
+        : basePoliticalData;
     politicalData = currentPoliticalData;
     currentLocale = selectedLocale;
 
@@ -1418,7 +1456,10 @@ const App: React.FC = () => {
     };
 
     useEffect(() => {
-        const nextData = politicalDataByCountry[selectedCountryCode] ?? esPoliticalData;
+        const baseNextData = politicalDataByCountry[selectedCountryCode] ?? esPoliticalData;
+        const nextData = ['FR', 'DE', 'GB', 'EU'].includes(selectedCountryCode)
+            ? localizeInternationalPoliticalData(baseNextData, selectedLocale)
+            : baseNextData;
         const nextKeys = getLocalStorageKeys(selectedCountryCode, selectedLocale);
         politicalData = nextData;
         currentLocale = selectedLocale;

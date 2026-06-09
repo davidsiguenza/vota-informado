@@ -167,3 +167,111 @@ export const euPoliticalData = buildData('EU', 'Elecciones europeas', 'Eleccione
   { name: 'ECR', color: '#0066CC', family: 'derecha conservadora y eurocrítica', ideologyVector: { economic: 6, social: -7, immigration: -8, climate: -6, globalism: -6 } },
   { name: 'Patriots for Europe', color: '#243B73', family: 'derecha nacionalista y soberanista', ideologyVector: { economic: 2, social: -9, immigration: -10, climate: -9, globalism: -10 } },
 ], commonTopics);
+
+type InternationalLocale = 'es' | 'en' | 'fr' | 'de';
+
+const internationalTranslations: Record<Exclude<InternationalLocale, 'es'>, Record<string, string>> = {
+  en: {
+    'Economía': 'Economy', 'Valores sociales': 'Social values', 'Inmigración': 'Immigration', 'Clima y energía': 'Climate and energy', 'Integración internacional': 'International integration',
+    'Redistribución e inversión pública': 'Redistribution and public investment', 'Mercado y menor fiscalidad': 'Markets and lower taxes', 'Conservador': 'Conservative', 'Progresista': 'Progressive',
+    'Restrictiva': 'Restrictive', 'Abierta e integradora': 'Open and inclusive', 'Prioridad al coste y energía convencional': 'Priority on cost and conventional energy',
+    'Transición verde acelerada': 'Accelerated green transition', 'Soberanista': 'Sovereigntist', 'Multilateral e integradora': 'Multilateral and integrationist',
+    'Economía y Estado del bienestar': 'Economy and welfare state', 'Sociedad, derechos e instituciones': 'Society, rights and institutions', 'Inmigración e identidad': 'Immigration and identity',
+    'Clima, energía y transporte': 'Climate, energy and transport', 'Europa y política internacional': 'Europe and international policy',
+    'Fiscalidad progresiva': 'Progressive taxation', 'Servicios públicos': 'Public services', 'Flexibilidad empresarial': 'Business flexibility',
+    'Derechos civiles': 'Civil rights', 'Tradición y autoridad': 'Tradition and authority', 'Muerte asistida': 'Assisted dying',
+    'Vías legales e integración': 'Legal pathways and integration', 'Control fronterizo': 'Border control', 'Asilo compartido': 'Shared asylum responsibility',
+    'Transición verde': 'Green transition', 'Transporte limpio': 'Clean transport', 'Coste energético': 'Energy costs',
+    'Integración europea': 'European integration', 'Soberanía nacional': 'National sovereignty', 'Defensa europea': 'European defence',
+    'Francia': 'France', 'Alemania': 'Germany', 'Reino Unido': 'United Kingdom', 'Elecciones europeas': 'European elections',
+  },
+  fr: {
+    'Economía': 'Économie', 'Valores sociales': 'Valeurs sociales', 'Inmigración': 'Immigration', 'Clima y energía': 'Climat et énergie', 'Integración internacional': 'Intégration internationale',
+    'Redistribución e inversión pública': 'Redistribution et investissement public', 'Mercado y menor fiscalidad': 'Marché et baisse de la fiscalité', 'Conservador': 'Conservateur', 'Progresista': 'Progressiste',
+    'Restrictiva': 'Restrictive', 'Abierta e integradora': 'Ouverte et inclusive', 'Prioridad al coste y energía convencional': 'Priorité au coût et aux énergies conventionnelles',
+    'Transición verde acelerada': 'Transition écologique accélérée', 'Soberanista': 'Souverainiste', 'Multilateral e integradora': 'Multilatérale et intégrationniste',
+    'Economía y Estado del bienestar': 'Économie et État-providence', 'Sociedad, derechos e instituciones': 'Société, droits et institutions', 'Inmigración e identidad': 'Immigration et identité',
+    'Clima, energía y transporte': 'Climat, énergie et transports', 'Europa y política internacional': 'Europe et politique internationale',
+    'Fiscalidad progresiva': 'Fiscalité progressive', 'Servicios públicos': 'Services publics', 'Flexibilidad empresarial': 'Flexibilité des entreprises',
+    'Derechos civiles': 'Droits civiques', 'Tradición y autoridad': 'Tradition et autorité', 'Muerte asistida': 'Aide médicale à mourir',
+    'Vías legales e integración': 'Voies légales et intégration', 'Control fronterizo': 'Contrôle des frontières', 'Asilo compartido': 'Partage de l’accueil des réfugiés',
+    'Transición verde': 'Transition écologique', 'Transporte limpio': 'Transports propres', 'Coste energético': 'Coût de l’énergie',
+    'Integración europea': 'Intégration européenne', 'Soberanía nacional': 'Souveraineté nationale', 'Defensa europea': 'Défense européenne',
+    'Francia': 'France', 'Alemania': 'Allemagne', 'Reino Unido': 'Royaume-Uni', 'Elecciones europeas': 'Élections européennes',
+  },
+  de: {
+    'Economía': 'Wirtschaft', 'Valores sociales': 'Gesellschaftliche Werte', 'Inmigración': 'Einwanderung', 'Clima y energía': 'Klima und Energie', 'Integración internacional': 'Internationale Integration',
+    'Redistribución e inversión pública': 'Umverteilung und öffentliche Investitionen', 'Mercado y menor fiscalidad': 'Markt und niedrigere Steuern', 'Conservador': 'Konservativ', 'Progresista': 'Progressiv',
+    'Restrictiva': 'Restriktiv', 'Abierta e integradora': 'Offen und integrativ', 'Prioridad al coste y energía convencional': 'Vorrang für Kosten und konventionelle Energie',
+    'Transición verde acelerada': 'Beschleunigte grüne Transformation', 'Soberanista': 'Souveränistisch', 'Multilateral e integradora': 'Multilateral und integrationsorientiert',
+    'Economía y Estado del bienestar': 'Wirtschaft und Sozialstaat', 'Sociedad, derechos e instituciones': 'Gesellschaft, Rechte und Institutionen', 'Inmigración e identidad': 'Einwanderung und Identität',
+    'Clima, energía y transporte': 'Klima, Energie und Verkehr', 'Europa y política internacional': 'Europa und internationale Politik',
+    'Fiscalidad progresiva': 'Progressive Besteuerung', 'Servicios públicos': 'Öffentliche Dienste', 'Flexibilidad empresarial': 'Unternehmerische Flexibilität',
+    'Derechos civiles': 'Bürgerrechte', 'Tradición y autoridad': 'Tradition und Autorität', 'Muerte asistida': 'Sterbehilfe',
+    'Vías legales e integración': 'Legale Wege und Integration', 'Control fronterizo': 'Grenzkontrollen', 'Asilo compartido': 'Gemeinsame Asylverantwortung',
+    'Transición verde': 'Grüne Transformation', 'Transporte limpio': 'Sauberer Verkehr', 'Coste energético': 'Energiekosten',
+    'Integración europea': 'Europäische Integration', 'Soberanía nacional': 'Nationale Souveränität', 'Defensa europea': 'Europäische Verteidigung',
+    'Francia': 'Frankreich', 'Alemania': 'Deutschland', 'Reino Unido': 'Vereinigtes Königreich', 'Elecciones europeas': 'Europawahl',
+  },
+};
+
+const questionTranslations: Record<Exclude<InternationalLocale, 'es'>, string[][]> = {
+  en: [
+    ['Taxes on high incomes and large fortunes should be raised to strengthen public services.', 'Healthcare, education and care services should receive more public investment even if spending rises.', 'Reducing regulation and business taxes promotes growth more effectively than new public subsidies.'],
+    ['The state should actively expand protections for LGBTQ+ people and against discrimination.', 'Public policy should place greater weight on tradition, discipline and authority.', 'Medically assisted dying should be legal under strict safeguards.'],
+    ['Legal migration pathways and integration programmes should be expanded.', 'The country should significantly tighten border controls and speed up removals.', 'The reception of asylum seekers should be shared fairly among European territories.'],
+    ['Emissions reductions should be accelerated even if this brings short-term economic costs.', 'Much more should be invested in public transport while the most polluting vehicles are gradually restricted.', 'Climate targets should be postponed when they make energy significantly more expensive.'],
+    ['The European Union should assume more shared powers in the economy, energy and foreign policy.', 'National decisions should more often prevail over European rules.', 'Europe should coordinate its defence and foreign policy more closely.'],
+  ],
+  fr: [
+    ['Les impôts sur les hauts revenus et les grandes fortunes devraient augmenter afin de renforcer les services publics.', 'La santé, l’éducation et les services de soins devraient recevoir davantage d’investissements publics, même si les dépenses augmentent.', 'Réduire la réglementation et les impôts des entreprises favorise davantage la croissance que de nouvelles aides publiques.'],
+    ['L’État devrait renforcer activement la protection des personnes LGBTQ+ et la lutte contre les discriminations.', 'Les politiques publiques devraient accorder davantage de poids à la tradition, à la discipline et à l’autorité.', 'L’aide médicale à mourir devrait être légale sous de strictes garanties.'],
+    ['Les voies légales de migration et les programmes d’intégration devraient être développés.', 'Le pays devrait renforcer nettement les contrôles aux frontières et accélérer les expulsions.', 'L’accueil des demandeurs d’asile devrait être réparti équitablement entre les territoires européens.'],
+    ['La réduction des émissions devrait être accélérée, même au prix de coûts économiques à court terme.', 'Il faudrait investir beaucoup plus dans les transports publics et limiter progressivement les véhicules les plus polluants.', 'Les objectifs climatiques devraient être reportés lorsqu’ils renchérissent fortement l’énergie.'],
+    ['L’Union européenne devrait exercer davantage de compétences communes en économie, énergie et politique étrangère.', 'Les décisions nationales devraient plus souvent primer sur les règles européennes.', 'L’Europe devrait mieux coordonner sa défense et sa politique étrangère.'],
+  ],
+  de: [
+    ['Steuern auf hohe Einkommen und große Vermögen sollten erhöht werden, um öffentliche Dienste zu stärken.', 'Gesundheit, Bildung und Pflege sollten mehr öffentliche Investitionen erhalten, auch wenn dadurch die Ausgaben steigen.', 'Weniger Regulierung und niedrigere Unternehmenssteuern fördern Wachstum stärker als neue staatliche Hilfen.'],
+    ['Der Staat sollte den Schutz von LGBTQ+-Menschen und vor Diskriminierung aktiv ausbauen.', 'Die Politik sollte Tradition, Disziplin und Autorität stärker gewichten.', 'Medizinisch assistiertes Sterben sollte unter strengen Schutzvorkehrungen legal sein.'],
+    ['Legale Migrationswege und Integrationsprogramme sollten ausgebaut werden.', 'Das Land sollte Grenzkontrollen deutlich verschärfen und Abschiebungen beschleunigen.', 'Die Aufnahme von Asylsuchenden sollte solidarisch zwischen europäischen Gebieten verteilt werden.'],
+    ['Die Emissionssenkung sollte beschleunigt werden, auch wenn kurzfristig wirtschaftliche Kosten entstehen.', 'Es sollte deutlich mehr in den öffentlichen Verkehr investiert und besonders umweltschädliche Fahrzeuge schrittweise eingeschränkt werden.', 'Klimaziele sollten verschoben werden, wenn sie Energie deutlich verteuern.'],
+    ['Die Europäische Union sollte mehr gemeinsame Zuständigkeiten in Wirtschaft, Energie und Außenpolitik übernehmen.', 'Nationale Entscheidungen sollten häufiger Vorrang vor europäischen Regeln haben.', 'Europa sollte seine Verteidigung und Außenpolitik enger koordinieren.'],
+  ],
+};
+
+const localeLanguage = (locale: string): InternationalLocale => {
+  if (locale.startsWith('fr')) return 'fr';
+  if (locale.startsWith('de')) return 'de';
+  if (locale.startsWith('en')) return 'en';
+  return 'es';
+};
+
+export const localizeInternationalPoliticalData = (data: PoliticalData, locale: string): PoliticalData => {
+  const language = localeLanguage(locale);
+  if (language === 'es') return data;
+  const translate = (value: string) => internationalTranslations[language][value] ?? value;
+  const generic = {
+    en: { topic: 'This topic compares the main political approaches and trade-offs in this area.', objective: 'Measures the political divide expressed by this proposal.', justification: 'This position reflects the party’s orientation on the relevant political axis.', summary: 'This party’s overall position is derived from its answers to the proposals in this topic.' },
+    fr: { topic: 'Ce thème compare les principales approches politiques et leurs arbitrages dans ce domaine.', objective: 'Mesure le clivage politique exprimé par cette proposition.', justification: 'Cette position reflète l’orientation du parti sur l’axe politique concerné.', summary: 'La position générale de ce parti découle de ses réponses aux propositions de ce thème.' },
+    de: { topic: 'Dieses Thema vergleicht die wichtigsten politischen Ansätze und Zielkonflikte in diesem Bereich.', objective: 'Misst die politische Trennlinie, die dieser Vorschlag ausdrückt.', justification: 'Diese Position spiegelt die Ausrichtung der Partei auf der jeweiligen politischen Achse wider.', summary: 'Die Gesamtposition dieser Partei ergibt sich aus ihren Antworten auf die Vorschläge dieses Themas.' },
+  }[language];
+
+  return {
+    ...data,
+    country: data.country ? { ...data.country, name: translate(data.country.name), defaultLocale: locale } : undefined,
+    ideologyAxes: data.ideologyAxes?.map(axis => ({ ...axis, label: translate(axis.label), leftLabel: translate(axis.leftLabel), rightLabel: translate(axis.rightLabel) })),
+    topics: data.topics.map((topic, topicIndex) => ({
+      ...topic,
+      title: translate(topic.title),
+      description: generic.topic,
+      questions: topic.questions.map((question, questionIndex) => ({
+        ...question,
+        text: translate(question.text),
+        description: questionTranslations[language][topicIndex]?.[questionIndex] ?? question.description,
+        objective: generic.objective,
+        partyStances: question.partyStances.map(stance => ({ ...stance, justification: generic.justification })),
+      })),
+      partyTopicSummaries: topic.partyTopicSummaries?.map(summary => ({ ...summary, summary: generic.summary })),
+    })),
+  };
+};
